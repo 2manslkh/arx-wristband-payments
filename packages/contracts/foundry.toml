@@ -21,17 +21,7 @@ fuzz = { runs = 10_000 }
 verbosity = 4
 
 [etherscan]
-arbitrum_testnet = { key = "${API_KEY_ARBISCAN}", url = "https://api-sepolia.arbiscan.io/api" }
-gnosis_testnet = { key = "${API_KEY_GNOSISSCAN}", url = "https://gnosis-chiado.blockscout.com/api" }
-goerli = { key = "${API_KEY_ETHERSCAN}" }
-mainnet = { key = "${API_KEY_ETHERSCAN}" }
-optimism = { key = "${API_KEY_OPTIMISTIC_ETHERSCAN}" }
-polygon = { key = "${API_KEY_POLYGONSCAN}" }
-sepolia = { key = "${API_KEY_ETHERSCAN}" }
-holesky = { key = "${API_KEY_ETHERSCAN}" }
-taiko_testnet = { key = "42069", chain = "167007", url = "https://blockscoutapi.jolnir.taiko.xyz/api?" }
-scroll_testnet = { key = "${API_KEY_ETHERSCAN}", url = "https://sepolia-blockscout.scroll.io/api?" }
-mantle_testnet = { key = "42069", url = "https://explorer.testnet.mantle.xyz/api?" }
+base_sepolia = { key = "${API_KEY_BASESCAN}", url = "https://sepolia.basescan.org/api?" }
 
 [fmt]
 bracket_spacing = true

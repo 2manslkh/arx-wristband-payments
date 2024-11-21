@@ -1,15 +1,30 @@
-import { defineConfig } from 'vite';
-// vite.config.js
 import { sveltekit } from '@sveltejs/kit/vite';
-// import { defineConfig } from 'vitest/dist/config';
+import { defineConfig } from 'vitest/config';
+import fs from 'fs';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
-  build: {
-    sourcemap: true,
-  },
   plugins: [
-    sveltekit(),
-    // This plugin gives vite the ability to resolve imports using TypeScript's path mapping.
-    // https://www.npmjs.com/package/vite-tsconfig-paths
+    nodePolyfills({
+      exclude: ['fs'],
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true
+      },
+      protocolImports: true
+    }),
+    sveltekit()
   ],
+
+  server: {
+    https: {
+      key: fs.readFileSync('./server.key'),
+      cert: fs.readFileSync('./server.crt')
+    },
+    proxy: {}
+  },
+  test: {
+    include: ['src/**/*.{test,spec}.{js,ts}']
+  }
 });

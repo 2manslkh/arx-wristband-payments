@@ -1,14 +1,22 @@
-class Counter {
-    private count = $state(0);
+import { zeroAddress, type Account, type Address } from "viem";
 
-    get() {
-        return this.count;
-    }
+let haloAccount = $state<Account | null>(null);
+let haloAddress = $state<Address>(zeroAddress);
 
-    set(newCount: number) {
-        this.count = newCount;
-    }
+
+export function getHaloAccount() {
+    return haloAccount;
 }
 
-export const counter = new Counter();
+export function setHaloAccount(account: Account) {
+    haloAccount = account;
+}
+
+export function getHaloAddress() {
+    return haloAddress;
+}
+
+export function setHaloAddress(address: Address) {
+    haloAddress = address;
+}
 

@@ -6,29 +6,133 @@ import {
 } from 'wagmi/codegen'
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Counter
+// Token
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const counterAbi = [
-  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
+/**
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const tokenAbi = [
   {
-    type: 'function',
-    inputs: [],
-    name: 'decrement',
-    outputs: [],
+    type: 'constructor',
+    inputs: [
+      { name: 'name', internalType: 'string', type: 'string' },
+      { name: 'symbol', internalType: 'string', type: 'string' },
+      { name: 'initialSupply', internalType: 'uint256', type: 'uint256' },
+    ],
     stateMutability: 'nonpayable',
   },
   {
     type: 'function',
-    inputs: [],
-    name: 'getCount',
+    inputs: [
+      { name: 'owner', internalType: 'address', type: 'address' },
+      { name: 'spender', internalType: 'address', type: 'address' },
+    ],
+    name: 'allowance',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'spender', internalType: 'address', type: 'address' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'approve',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'balanceOf',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     stateMutability: 'view',
   },
   {
     type: 'function',
     inputs: [],
-    name: 'increment',
+    name: 'decimals',
+    outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'to', internalType: 'address', type: 'address' }],
+    name: 'faucet',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'to', internalType: 'address', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'mint',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'name',
+    outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'symbol',
+    outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'totalSupply',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'to', internalType: 'address', type: 'address' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'transfer',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address' },
+      { name: 'to', internalType: 'address', type: 'address' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'transferFrom',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -37,667 +141,429 @@ export const counterAbi = [
     anonymous: false,
     inputs: [
       {
-        name: 'newCount',
+        name: 'owner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'spender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'value',
         internalType: 'uint256',
         type: 'uint256',
         indexed: false,
       },
     ],
-    name: 'CounterChanged',
+    name: 'Approval',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address', indexed: true },
+      { name: 'to', internalType: 'address', type: 'address', indexed: true },
+      {
+        name: 'value',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Transfer',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'spender', internalType: 'address', type: 'address' },
+      { name: 'allowance', internalType: 'uint256', type: 'uint256' },
+      { name: 'needed', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'ERC20InsufficientAllowance',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'sender', internalType: 'address', type: 'address' },
+      { name: 'balance', internalType: 'uint256', type: 'uint256' },
+      { name: 'needed', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'ERC20InsufficientBalance',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidApprover',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'receiver', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidReceiver',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'sender', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidSender',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'spender', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidSpender',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
   },
 ] as const
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// IMulticall3
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const iMulticall3Abi = [
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'calls',
-        internalType: 'struct IMulticall3.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'target', internalType: 'address', type: 'address' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'aggregate',
-    outputs: [
-      { name: 'blockNumber', internalType: 'uint256', type: 'uint256' },
-      { name: 'returnData', internalType: 'bytes[]', type: 'bytes[]' },
-    ],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'calls',
-        internalType: 'struct IMulticall3.Call3[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'target', internalType: 'address', type: 'address' },
-          { name: 'allowFailure', internalType: 'bool', type: 'bool' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'aggregate3',
-    outputs: [
-      {
-        name: 'returnData',
-        internalType: 'struct IMulticall3.Result[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'success', internalType: 'bool', type: 'bool' },
-          { name: 'returnData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'calls',
-        internalType: 'struct IMulticall3.Call3Value[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'target', internalType: 'address', type: 'address' },
-          { name: 'allowFailure', internalType: 'bool', type: 'bool' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'aggregate3Value',
-    outputs: [
-      {
-        name: 'returnData',
-        internalType: 'struct IMulticall3.Result[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'success', internalType: 'bool', type: 'bool' },
-          { name: 'returnData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'calls',
-        internalType: 'struct IMulticall3.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'target', internalType: 'address', type: 'address' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'blockAndAggregate',
-    outputs: [
-      { name: 'blockNumber', internalType: 'uint256', type: 'uint256' },
-      { name: 'blockHash', internalType: 'bytes32', type: 'bytes32' },
-      {
-        name: 'returnData',
-        internalType: 'struct IMulticall3.Result[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'success', internalType: 'bool', type: 'bool' },
-          { name: 'returnData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getBasefee',
-    outputs: [{ name: 'basefee', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'blockNumber', internalType: 'uint256', type: 'uint256' }],
-    name: 'getBlockHash',
-    outputs: [{ name: 'blockHash', internalType: 'bytes32', type: 'bytes32' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getBlockNumber',
-    outputs: [
-      { name: 'blockNumber', internalType: 'uint256', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getChainId',
-    outputs: [{ name: 'chainid', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getCurrentBlockCoinbase',
-    outputs: [{ name: 'coinbase', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getCurrentBlockDifficulty',
-    outputs: [{ name: 'difficulty', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getCurrentBlockGasLimit',
-    outputs: [{ name: 'gaslimit', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getCurrentBlockTimestamp',
-    outputs: [{ name: 'timestamp', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'addr', internalType: 'address', type: 'address' }],
-    name: 'getEthBalance',
-    outputs: [{ name: 'balance', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'getLastBlockHash',
-    outputs: [{ name: 'blockHash', internalType: 'bytes32', type: 'bytes32' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'requireSuccess', internalType: 'bool', type: 'bool' },
-      {
-        name: 'calls',
-        internalType: 'struct IMulticall3.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'target', internalType: 'address', type: 'address' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'tryAggregate',
-    outputs: [
-      {
-        name: 'returnData',
-        internalType: 'struct IMulticall3.Result[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'success', internalType: 'bool', type: 'bool' },
-          { name: 'returnData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'requireSuccess', internalType: 'bool', type: 'bool' },
-      {
-        name: 'calls',
-        internalType: 'struct IMulticall3.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'target', internalType: 'address', type: 'address' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'tryBlockAndAggregate',
-    outputs: [
-      { name: 'blockNumber', internalType: 'uint256', type: 'uint256' },
-      { name: 'blockHash', internalType: 'bytes32', type: 'bytes32' },
-      {
-        name: 'returnData',
-        internalType: 'struct IMulticall3.Result[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'success', internalType: 'bool', type: 'bool' },
-          { name: 'returnData', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    stateMutability: 'payable',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TestContract
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const testContractAbi = [
-  {
-    type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
-    name: 'balances',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'deposit',
-    outputs: [],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '_user', internalType: 'address', type: 'address' }],
-    name: 'getBalance',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'withdraw',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-] as const
-
-export const testContractAddress =
-  '0x1234567890123456789012345678901234567890' as const
-
-export const testContractConfig = {
-  address: testContractAddress,
-  abi: testContractAbi,
+/**
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const tokenAddress = {
+  84532: '0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD',
 } as const
+
+/**
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const tokenConfig = { address: tokenAddress, abi: tokenAbi } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Wraps __{@link readContract}__ with `abi` set to __{@link counterAbi}__
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const readCounter = /*#__PURE__*/ createReadContract({ abi: counterAbi })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"getCount"`
- */
-export const readCounterGetCount = /*#__PURE__*/ createReadContract({
-  abi: counterAbi,
-  functionName: 'getCount',
+export const readToken = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
 })
 
 /**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link counterAbi}__
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"allowance"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const writeCounter = /*#__PURE__*/ createWriteContract({
-  abi: counterAbi,
+export const readTokenAllowance = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'allowance',
 })
 
 /**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"decrement"`
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"balanceOf"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const writeCounterDecrement = /*#__PURE__*/ createWriteContract({
-  abi: counterAbi,
-  functionName: 'decrement',
+export const readTokenBalanceOf = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'balanceOf',
 })
 
 /**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"increment"`
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"decimals"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const writeCounterIncrement = /*#__PURE__*/ createWriteContract({
-  abi: counterAbi,
-  functionName: 'increment',
+export const readTokenDecimals = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'decimals',
 })
 
 /**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link counterAbi}__
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"name"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const simulateCounter = /*#__PURE__*/ createSimulateContract({
-  abi: counterAbi,
+export const readTokenName = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'name',
 })
 
 /**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"decrement"`
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"owner"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const simulateCounterDecrement = /*#__PURE__*/ createSimulateContract({
-  abi: counterAbi,
-  functionName: 'decrement',
+export const readTokenOwner = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'owner',
 })
 
 /**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"increment"`
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"symbol"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const simulateCounterIncrement = /*#__PURE__*/ createSimulateContract({
-  abi: counterAbi,
-  functionName: 'increment',
+export const readTokenSymbol = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'symbol',
 })
 
 /**
- * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link counterAbi}__
+ * Wraps __{@link readContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"totalSupply"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const watchCounterEvent = /*#__PURE__*/ createWatchContractEvent({
-  abi: counterAbi,
+export const readTokenTotalSupply = /*#__PURE__*/ createReadContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'totalSupply',
 })
 
 /**
- * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link counterAbi}__ and `eventName` set to `"CounterChanged"`
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const watchCounterCounterChangedEvent =
+export const writeToken = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+})
+
+/**
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"approve"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const writeTokenApprove = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'approve',
+})
+
+/**
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"faucet"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const writeTokenFaucet = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'faucet',
+})
+
+/**
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"mint"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const writeTokenMint = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'mint',
+})
+
+/**
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"renounceOwnership"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const writeTokenRenounceOwnership = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'renounceOwnership',
+})
+
+/**
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"transfer"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const writeTokenTransfer = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'transfer',
+})
+
+/**
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"transferFrom"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const writeTokenTransferFrom = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'transferFrom',
+})
+
+/**
+ * Wraps __{@link writeContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"transferOwnership"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const writeTokenTransferOwnership = /*#__PURE__*/ createWriteContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'transferOwnership',
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateToken = /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"approve"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateTokenApprove = /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'approve',
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"faucet"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateTokenFaucet = /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'faucet',
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"mint"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateTokenMint = /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'mint',
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"renounceOwnership"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateTokenRenounceOwnership =
+  /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'renounceOwnership',
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"transfer"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateTokenTransfer = /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'transfer',
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"transferFrom"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateTokenTransferFrom = /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'transferFrom',
+})
+
+/**
+ * Wraps __{@link simulateContract}__ with `abi` set to __{@link tokenAbi}__ and `functionName` set to `"transferOwnership"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const simulateTokenTransferOwnership =
+  /*#__PURE__*/ createSimulateContract({
+  abi: tokenAbi,
+  address: tokenAddress,
+  functionName: 'transferOwnership',
+})
+
+/**
+ * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link tokenAbi}__
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const watchTokenEvent = /*#__PURE__*/ createWatchContractEvent({
+  abi: tokenAbi,
+  address: tokenAddress,
+})
+
+/**
+ * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link tokenAbi}__ and `eventName` set to `"Approval"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const watchTokenApprovalEvent = /*#__PURE__*/ createWatchContractEvent({
+  abi: tokenAbi,
+  address: tokenAddress,
+  eventName: 'Approval',
+})
+
+/**
+ * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link tokenAbi}__ and `eventName` set to `"OwnershipTransferred"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
+ */
+export const watchTokenOwnershipTransferredEvent =
   /*#__PURE__*/ createWatchContractEvent({
-    abi: counterAbi,
-    eventName: 'CounterChanged',
-  })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__
- */
-export const readIMulticall3 = /*#__PURE__*/ createReadContract({
-  abi: iMulticall3Abi,
+  abi: tokenAbi,
+  address: tokenAddress,
+  eventName: 'OwnershipTransferred',
 })
 
 /**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getBasefee"`
+ * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link tokenAbi}__ and `eventName` set to `"Transfer"`
+ *
+ * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8f8fcd2f80A118fD8413f1e11ed2aae990AA02dD)
  */
-export const readIMulticall3GetBasefee = /*#__PURE__*/ createReadContract({
-  abi: iMulticall3Abi,
-  functionName: 'getBasefee',
+export const watchTokenTransferEvent = /*#__PURE__*/ createWatchContractEvent({
+  abi: tokenAbi,
+  address: tokenAddress,
+  eventName: 'Transfer',
 })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getBlockHash"`
- */
-export const readIMulticall3GetBlockHash = /*#__PURE__*/ createReadContract({
-  abi: iMulticall3Abi,
-  functionName: 'getBlockHash',
-})
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getBlockNumber"`
- */
-export const readIMulticall3GetBlockNumber = /*#__PURE__*/ createReadContract({
-  abi: iMulticall3Abi,
-  functionName: 'getBlockNumber',
-})
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getChainId"`
- */
-export const readIMulticall3GetChainId = /*#__PURE__*/ createReadContract({
-  abi: iMulticall3Abi,
-  functionName: 'getChainId',
-})
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getCurrentBlockCoinbase"`
- */
-export const readIMulticall3GetCurrentBlockCoinbase =
-  /*#__PURE__*/ createReadContract({
-    abi: iMulticall3Abi,
-    functionName: 'getCurrentBlockCoinbase',
-  })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getCurrentBlockDifficulty"`
- */
-export const readIMulticall3GetCurrentBlockDifficulty =
-  /*#__PURE__*/ createReadContract({
-    abi: iMulticall3Abi,
-    functionName: 'getCurrentBlockDifficulty',
-  })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getCurrentBlockGasLimit"`
- */
-export const readIMulticall3GetCurrentBlockGasLimit =
-  /*#__PURE__*/ createReadContract({
-    abi: iMulticall3Abi,
-    functionName: 'getCurrentBlockGasLimit',
-  })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getCurrentBlockTimestamp"`
- */
-export const readIMulticall3GetCurrentBlockTimestamp =
-  /*#__PURE__*/ createReadContract({
-    abi: iMulticall3Abi,
-    functionName: 'getCurrentBlockTimestamp',
-  })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getEthBalance"`
- */
-export const readIMulticall3GetEthBalance = /*#__PURE__*/ createReadContract({
-  abi: iMulticall3Abi,
-  functionName: 'getEthBalance',
-})
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"getLastBlockHash"`
- */
-export const readIMulticall3GetLastBlockHash = /*#__PURE__*/ createReadContract(
-  { abi: iMulticall3Abi, functionName: 'getLastBlockHash' },
-)
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link iMulticall3Abi}__
- */
-export const writeIMulticall3 = /*#__PURE__*/ createWriteContract({
-  abi: iMulticall3Abi,
-})
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"aggregate"`
- */
-export const writeIMulticall3Aggregate = /*#__PURE__*/ createWriteContract({
-  abi: iMulticall3Abi,
-  functionName: 'aggregate',
-})
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"aggregate3"`
- */
-export const writeIMulticall3Aggregate3 = /*#__PURE__*/ createWriteContract({
-  abi: iMulticall3Abi,
-  functionName: 'aggregate3',
-})
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"aggregate3Value"`
- */
-export const writeIMulticall3Aggregate3Value =
-  /*#__PURE__*/ createWriteContract({
-    abi: iMulticall3Abi,
-    functionName: 'aggregate3Value',
-  })
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"blockAndAggregate"`
- */
-export const writeIMulticall3BlockAndAggregate =
-  /*#__PURE__*/ createWriteContract({
-    abi: iMulticall3Abi,
-    functionName: 'blockAndAggregate',
-  })
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"tryAggregate"`
- */
-export const writeIMulticall3TryAggregate = /*#__PURE__*/ createWriteContract({
-  abi: iMulticall3Abi,
-  functionName: 'tryAggregate',
-})
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"tryBlockAndAggregate"`
- */
-export const writeIMulticall3TryBlockAndAggregate =
-  /*#__PURE__*/ createWriteContract({
-    abi: iMulticall3Abi,
-    functionName: 'tryBlockAndAggregate',
-  })
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link iMulticall3Abi}__
- */
-export const simulateIMulticall3 = /*#__PURE__*/ createSimulateContract({
-  abi: iMulticall3Abi,
-})
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"aggregate"`
- */
-export const simulateIMulticall3Aggregate =
-  /*#__PURE__*/ createSimulateContract({
-    abi: iMulticall3Abi,
-    functionName: 'aggregate',
-  })
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"aggregate3"`
- */
-export const simulateIMulticall3Aggregate3 =
-  /*#__PURE__*/ createSimulateContract({
-    abi: iMulticall3Abi,
-    functionName: 'aggregate3',
-  })
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"aggregate3Value"`
- */
-export const simulateIMulticall3Aggregate3Value =
-  /*#__PURE__*/ createSimulateContract({
-    abi: iMulticall3Abi,
-    functionName: 'aggregate3Value',
-  })
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"blockAndAggregate"`
- */
-export const simulateIMulticall3BlockAndAggregate =
-  /*#__PURE__*/ createSimulateContract({
-    abi: iMulticall3Abi,
-    functionName: 'blockAndAggregate',
-  })
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"tryAggregate"`
- */
-export const simulateIMulticall3TryAggregate =
-  /*#__PURE__*/ createSimulateContract({
-    abi: iMulticall3Abi,
-    functionName: 'tryAggregate',
-  })
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link iMulticall3Abi}__ and `functionName` set to `"tryBlockAndAggregate"`
- */
-export const simulateIMulticall3TryBlockAndAggregate =
-  /*#__PURE__*/ createSimulateContract({
-    abi: iMulticall3Abi,
-    functionName: 'tryBlockAndAggregate',
-  })
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link testContractAbi}__
- */
-export const readTestContract = /*#__PURE__*/ createReadContract({
-  abi: testContractAbi,
-  address: testContractAddress,
-})
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link testContractAbi}__ and `functionName` set to `"balances"`
- */
-export const readTestContractBalances = /*#__PURE__*/ createReadContract({
-  abi: testContractAbi,
-  address: testContractAddress,
-  functionName: 'balances',
-})
-
-/**
- * Wraps __{@link readContract}__ with `abi` set to __{@link testContractAbi}__ and `functionName` set to `"getBalance"`
- */
-export const readTestContractGetBalance = /*#__PURE__*/ createReadContract({
-  abi: testContractAbi,
-  address: testContractAddress,
-  functionName: 'getBalance',
-})
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link testContractAbi}__
- */
-export const writeTestContract = /*#__PURE__*/ createWriteContract({
-  abi: testContractAbi,
-  address: testContractAddress,
-})
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link testContractAbi}__ and `functionName` set to `"deposit"`
- */
-export const writeTestContractDeposit = /*#__PURE__*/ createWriteContract({
-  abi: testContractAbi,
-  address: testContractAddress,
-  functionName: 'deposit',
-})
-
-/**
- * Wraps __{@link writeContract}__ with `abi` set to __{@link testContractAbi}__ and `functionName` set to `"withdraw"`
- */
-export const writeTestContractWithdraw = /*#__PURE__*/ createWriteContract({
-  abi: testContractAbi,
-  address: testContractAddress,
-  functionName: 'withdraw',
-})
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link testContractAbi}__
- */
-export const simulateTestContract = /*#__PURE__*/ createSimulateContract({
-  abi: testContractAbi,
-  address: testContractAddress,
-})
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link testContractAbi}__ and `functionName` set to `"deposit"`
- */
-export const simulateTestContractDeposit = /*#__PURE__*/ createSimulateContract(
-  {
-    abi: testContractAbi,
-    address: testContractAddress,
-    functionName: 'deposit',
-  },
-)
-
-/**
- * Wraps __{@link simulateContract}__ with `abi` set to __{@link testContractAbi}__ and `functionName` set to `"withdraw"`
- */
-export const simulateTestContractWithdraw =
-  /*#__PURE__*/ createSimulateContract({
-    abi: testContractAbi,
-    address: testContractAddress,
-    functionName: 'withdraw',
-  })
