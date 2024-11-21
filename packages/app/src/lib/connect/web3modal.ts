@@ -29,15 +29,6 @@ export const wagmiAdapter = new WagmiAdapter({
   chains: [baseSepolia, hardhat],
   projectId,
   networks,
-  connectors: [
-
-    walletConnect({
-      chains: [baseSepolia, hardhat],
-      options: {
-        projectId: projectId,
-      },
-    }),
-  ],
 })
 
 // 3. Configure the metadata
@@ -68,16 +59,3 @@ export async function getWalletClient() {
 }
 
 // 5. Alternatively use w3m component buttons within the index.html file
-
-export const eip1193Provider: EIP1193Provider = await EthereumProvider.init({
-  projectId: projectId,
-  metadata,
-  showQrModal: true,
-  optionalChains: [baseSepolia.id, hardhat.id],
-
-  /*Optional - Add custom RPCs for each supported chain*/
-  rpcMap: {
-    [baseSepolia.id]: 'https://sepolia.base.org',
-    [hardhat.id]: 'https://127.0.0.1:8545'
-  }
-}) as EIP1193Provider

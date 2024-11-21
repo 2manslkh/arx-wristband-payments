@@ -12,8 +12,7 @@
       loading = true;
       error = null;
       // await magic.webauthn.registerNewUser({ username: "username" });
-      const token = await magic.webauthn.login({ username: "username" });
-      console.log("🚀 | handleLogin | token:", token);
+      magic.wallet.showUI();
     } catch (err) {
       error = "Failed to send login link. Please try again.";
     } finally {
