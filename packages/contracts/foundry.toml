@@ -1,0 +1,71 @@
+# Full reference https://github.com/foundry-rs/foundry/tree/master/crates/config
+
+[profile.default]
+auto_detect_solc = false
+block_timestamp = 1_680_220_800 # March 31, 2023 at 00:00 GMT
+bytecode_hash = "none"
+evm_version = "paris"           # See https://www.evmdiff.com/features?name=PUSH0&kind=opcode
+fuzz = { runs = 1_000 }
+gas_reports = ["*"]
+libs = ["lib"]
+optimizer = true
+optimizer_runs = 10_000
+out = "out"
+script = "script"
+solc = "0.8.21"
+src = "src"
+test = "test"
+
+[profile.ci]
+fuzz = { runs = 10_000 }
+verbosity = 4
+
+[etherscan]
+arbitrum_testnet = { key = "${API_KEY_ARBISCAN}", url = "https://api-sepolia.arbiscan.io/api" }
+gnosis_testnet = { key = "${API_KEY_GNOSISSCAN}", url = "https://gnosis-chiado.blockscout.com/api" }
+goerli = { key = "${API_KEY_ETHERSCAN}" }
+mainnet = { key = "${API_KEY_ETHERSCAN}" }
+optimism = { key = "${API_KEY_OPTIMISTIC_ETHERSCAN}" }
+polygon = { key = "${API_KEY_POLYGONSCAN}" }
+sepolia = { key = "${API_KEY_ETHERSCAN}" }
+holesky = { key = "${API_KEY_ETHERSCAN}" }
+taiko_testnet = { key = "42069", chain = "167007", url = "https://blockscoutapi.jolnir.taiko.xyz/api?" }
+scroll_testnet = { key = "${API_KEY_ETHERSCAN}", url = "https://sepolia-blockscout.scroll.io/api?" }
+mantle_testnet = { key = "42069", url = "https://explorer.testnet.mantle.xyz/api?" }
+
+[fmt]
+bracket_spacing = true
+int_types = "long"
+line_length = 120
+multiline_func_header = "all"
+number_underscore = "thousands"
+quote_style = "double"
+tab_width = 4
+wrap_comments = true
+
+
+[rpc_endpoints]
+localhost = "http://localhost:8545"
+mainnet = "https://1rpc.io/eth"
+goerli = "https://rpc.ankr.com/eth_goerli"
+mumbai = "https://polygon-testnet.public.blastapi.io"
+optimism_mainnet = "https://mainnet.optimism.io"
+optimism_testnet = "https://goerli.optimism.io"
+arbitrum_mainnet = "https://arb1.arbitrum.io/rpc"
+arbitrum_testnet = "https://sepolia-rollup.arbitrum.io/rpc"
+cronos_testnet = "https://evm-t3.cronos.org"
+cronos_mainnet = "https://1rpc.io/cro"
+scroll_testnet = "https://sepolia-rpc.scroll.io/"
+metis_testnet = "https://goerli.gateway.metisdevops.link"
+base_goerli = "https://goerli.base.org"
+base_sepolia = "https://sepolia.base.org"
+mantle_testnet = "https://rpc.testnet.mantle.xyz"
+taiko_testnet = "https://rpc.jolnir.taiko.xyz"
+gnosis = "https://rpc.gnosischain.com/"
+gnosis_testnet = "https://rpc.chiadochain.net"
+sepolia = "https://1rpc.io/sepolia"
+thundercore_testnet = "https://testnet-rpc.thundercore.com"
+linea_testnet = "https://rpc.goerli.linea.build"
+celo_testnet = "https://alfajores-forno.celo-testnet.org"
+polygon_zkvm_testnet = "https://rpc.public.zkevm-test.net"
+holesky = "https://1rpc.io/holesky"

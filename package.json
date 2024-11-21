@@ -1,0 +1,22 @@
+{
+  "name": "hackathon-template",
+  "version": "1.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "node": "anvil",
+    "test": "bun run --cwd packages/contracts test",
+    "deploy:local": "bun run --cwd packages/contracts deploy",
+    "deploy:dev": "bun run --cwd packages/contracts deploy:scroll_testnet",
+    "web": "bun run --cwd packages/app wagmi && bun run --cwd packages/app dev",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check --apply ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4"
+  }
+}

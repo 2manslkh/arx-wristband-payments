@@ -1,0 +1,24 @@
+{
+  "name": "contracts",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "forge test",
+    "build": "forge build",
+    "deploy": "forge script script/Deploy.s.sol --rpc-url localhost --broadcast",
+    "deploy:scroll_testnet": "forge script script/Deploy.s.sol --rpc-url scroll_testnet --broadcast --verify",
+    "deploy:mumbai": "forge script script/Deploy.s.sol --rpc-url mumbai --broadcast --verify",
+    "deploy:optimism_testnet": "forge script script/Deploy.s.sol --rpc-url optimism_testnet --broadcast --verify",
+    "deploy:taiko_testnet": "forge script script/Deploy.s.sol --rpc-url taiko_testnet --broadcast --verify",
+    "deploy:gnosis": "forge script script/Deploy.s.sol --rpc-url gnosis --broadcast --verify",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check --apply ."
+  },
+  "author": "2manslkh",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@biomejs/biome": "1.5.3"
+  }
+}
