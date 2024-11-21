@@ -158,7 +158,7 @@
 
 <div class="container mx-auto max-w-md p-4">
   <Tabs value="demo" class="w-full">
-    <TabsList class="grid w-full grid-cols-4">
+    <TabsList class="grid w-full h-full">
       <TabsTrigger value="onboard" class="cursor-pointer">Onboard</TabsTrigger>
       <TabsTrigger value="demo" class="cursor-pointer">Demo</TabsTrigger>
       <TabsTrigger value="demo token" class="cursor-pointer">

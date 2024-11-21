@@ -19,12 +19,15 @@
     retrieveHaloAccount,
     retrieveHaloAddress,
   } from "$lib/SmartAccount/HaloAccount";
-  import { smartAccount } from "$lib/SmartAccount/SmartAccount";
+  import { getSmartClient, smartAccount } from "$lib/SmartAccount/SmartAccount";
   import {
     getHaloAddress,
+    getSmartAccount,
     getSmartAccountAddress,
   } from "$stores/account.svelte";
   import { getStatus, getTransactionLink } from "$stores/status.svelte";
+  import { registerENS, setPrimaryName } from "$lib/ens/ens";
+  import { wagmiConfig } from "$lib/wagmi";
 
   // Reactive variables
   let statusMessage = "";
@@ -38,29 +41,10 @@
   let showBalanceInfo = false;
   let showStartButton = true;
   let isLoading = false;
-  let linkHref = "";
-  let linkText = "";
 
   function showStatus(message: string) {
     statusMessage = message;
     // You might want to add logic here to show/hide the status message
-  }
-
-  function showLink(txHash: string) {
-    linkHref = `https://sepolia.basescan.org/tx/${txHash}`;
-    linkText = "View transaction";
-  }
-
-  function updateStatus(status: string, execMethod: StatusCallbackDetails) {
-    console.info(status, execMethod);
-    const messages: { [key: string]: string } = {
-      init: " ",
-      again: "Processing (1/1).",
-      retry: "Processing (1/1)..",
-      finished: "Processing (1/1)...",
-    };
-
-    showStatus(messages[status] || `${status}, ${execMethod}`);
   }
 
   async function startOnboarding() {
@@ -68,12 +52,14 @@
     try {
       const haloChipAddress = await retrieveHaloAddress();
       const wallet = (await retrieveHaloAccount()) as LocalAccount;
+      const smartAccountClient = await getSmartClient(wallet);
 
-      showStatus("Creating smart account...");
+      showStatus("Creating ens name...");
 
-      await smartAccount(wallet);
+      await registerENS(wagmiConfig, smartAccountClient, name, wallet.address);
+      await setPrimaryName(wagmiConfig, name);
 
-      showStatus("Smart account created successfully!");
+      showStatus("ENS name created successfully!");
 
       await displayBalance(wallet.address);
     } catch (error) {

@@ -12,11 +12,10 @@ if (!apiKey) throw new Error('Missing PIMLICO_API_KEY');
 import { entryPoint07Address } from 'viem/account-abstraction';
 import { tokenAbi, tokenAddress } from '../../generated';
 import { setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
+import { setStatus, setTransactionLink } from '$stores/status.svelte';
 
-export async function smartAccount(signer: LocalAccount) {
-	console.log("🚀 | smartAccount | signer:", signer)
-	// Extract the account from the signer
 
+export async function getSmartClient(signer: LocalAccount) {
 	const publicClient = createPublicClient({
 		chain: baseSepolia,
 		transport: http('https://sepolia.base.org')
@@ -52,15 +51,27 @@ export async function smartAccount(signer: LocalAccount) {
 
 	setSmartAccount(smartAccountClient);
 
+	return smartAccountClient;
+}
+
+export async function smartAccount(signer: LocalAccount) {
+
+	const publicClient = createPublicClient({
+		chain: baseSepolia,
+		transport: http('https://sepolia.base.org')
+	});
+
+	console.info('Creating smart account client');
+
+	const smartAccountClient = await getSmartClient(signer);
+
 	if (smartAccountClient.account) {
 		setSmartAccountAddress(smartAccountClient.account.address as Address);
 	} else {
 		throw new Error('Smart account client account is undefined');
 	}
 
-	console.info('Step 5: Creating smart account client');
 
-	console.info('Step 8: Calling drip function');
 
 	const tokenContract = getContract({
 		address: tokenAddress[84532] as `0x${string}`,
@@ -70,22 +81,25 @@ export async function smartAccount(signer: LocalAccount) {
 			wallet: smartAccountClient
 		}
 	});
+	console.info('Calling drip function');
 	const dripTx = await tokenContract.write.faucet([smartAccountClient.account.address]);
 
 	console.info(`Token drip transaction sent. Hash: ${dripTx}`);
 	console.info('Waiting for drip transaction receipt...');
 	await publicClient.waitForTransactionReceipt({ hash: dripTx });
 
-	console.info('Step 9: Calling transfer function');
+	console.info('Calling transfer function');
 
 	const transferTx = await tokenContract.write.transfer([
-		'0x0006278a13186Df0F5eF4ee77a86AA1d68d0656E',
+		'0x88827a6d3693F33Bb4Ab61adc5a880Baa4B333bD',
 		parseEther('11')
 	]);
+
 
 	console.info(`Token transfer transaction sent. Hash: ${transferTx}`);
 	console.info('Waiting for transfer transaction receipt...');
 	await publicClient.waitForTransactionReceipt({ hash: transferTx });
-
+	setStatus('');
+	setTransactionLink(transferTx);
 	console.info('Smart account operations completed');
 }
