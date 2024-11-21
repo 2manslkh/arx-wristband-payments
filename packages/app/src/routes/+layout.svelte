@@ -1,9 +1,9 @@
 <script lang="ts">
   import "../app.css";
-  import { TopNavBar } from "$components/TopNavBar";
+  // import { TopNavBar } from "$components/TopNavBar";
   // import { startWatching } from "$lib/wagmi/watcher.svelte";
-  import { onMount } from "svelte";
-  import { reconnect } from "@wagmi/core";
+  // import { onMount } from "svelte";
+  // import { reconnect } from "@wagmi/core";
   // import { wagmiConfig } from "$lib/wagmi";
   const { children } = $props();
 

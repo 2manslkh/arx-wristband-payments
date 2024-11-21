@@ -2,20 +2,28 @@ import 'dotenv/config';
 import { createSmartAccountClient, type SmartAccountClient } from 'permissionless';
 import { toSafeSmartAccount, type SafeSmartAccountImplementation } from 'permissionless/accounts';
 import { createPimlicoClient } from 'permissionless/clients/pimlico';
-import { createPublicClient, getContract, http, parseEther, type Address, type LocalAccount } from 'viem';
+import { createPublicClient, getContract, http, parseEther, type Account, type Account, type Address, type EIP1193Provider, type LocalAccount, type WalletClient } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { PUBLIC_PIMLICO_API_KEY } from '$env/static/public';
 
 const apiKey = PUBLIC_PIMLICO_API_KEY;
 if (!apiKey) throw new Error('Missing PIMLICO_API_KEY');
 
-import { entryPoint07Address } from 'viem/account-abstraction';
+import { entryPoint06Address, entryPoint07Address } from 'viem/account-abstraction';
 import { tokenAbi, tokenAddress } from '../../generated';
 import { setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
 import { setStatus, setTransactionLink } from '$stores/status.svelte';
 
 
-export async function getSmartClient(signer: LocalAccount) {
+export async function getSmartClient(signer: WalletClient) {
+
+	console.log(signer.account?.address)
+
+	await signer.requestAddresses();
+	const [address] = await signer.getAddresses();
+	console.log("🚀 | getSmartClient | address:", address)
+	if (!address) throw new Error('No address found');
+
 	const publicClient = createPublicClient({
 		chain: baseSepolia,
 		transport: http('https://sepolia.base.org')
@@ -29,17 +37,20 @@ export async function getSmartClient(signer: LocalAccount) {
 		}
 	});
 
+
 	const safeAccount = await toSafeSmartAccount({
 		client: publicClient,
 		entryPoint: {
 			address: entryPoint07Address,
-			version: '0.7'
+			version: "0.7",
 		},
-		owners: [signer],
-		version: '1.4.1'
+		owners: [{ address }], // Changed to provide address directly
+		saltNonce: 0n,
+		safeVersion: "1.4.1",  // changed from version to safeVersion
 	});
 
 	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
+
 		account: safeAccount,
 		chain: baseSepolia,
 		paymaster: paymasterClient,
@@ -76,8 +87,6 @@ export async function smartAccount(signer: LocalAccount) {
 		throw new Error('Smart account client account is undefined');
 	}
 
-
-
 	const tokenContract = getContract({
 		address: tokenAddress[84532] as `0x${string}`,
 		abi: tokenAbi,
@@ -86,6 +95,7 @@ export async function smartAccount(signer: LocalAccount) {
 			wallet: smartAccountClient
 		}
 	});
+
 	console.info('Calling drip function');
 	const dripTx = await tokenContract.write.faucet([smartAccountClient.account.address]);
 

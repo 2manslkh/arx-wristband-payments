@@ -2,7 +2,7 @@
   import { Button } from "$lib/components/ui/button";
   import { ExternalLink } from "lucide-svelte";
 
-  let { href = $bindable<string>("") } = $props();
+  const { href = $bindable("") } = $props();
 </script>
 
 <Button variant="link" class="mt-2 group">

@@ -24,6 +24,7 @@
   import Onboard from "$components/Demo/Onboard.svelte";
   import SmartOnboard from "$components/Demo/SmartOnboard.svelte";
   import RegisterENS from "$components/Demo/RegisterENS.svelte";
+  import CreateAccount from "$components/Demo/CreateAccount.svelte";
 
   // Constants
   const amount = "0.00001";
@@ -155,20 +156,21 @@
 </script>
 
 <div class="container mx-auto max-w-md p-4">
-  <Tabs value="demo" class="w-full">
-    <TabsList class="grid w-full h-full">
+  <Tabs value="create" class="w-full">
+    <TabsList class="grid w-full h-full grid-cols-6">
+      <TabsTrigger value="create" class="cursor-pointer">Create</TabsTrigger>
       <TabsTrigger value="onboard" class="cursor-pointer">Onboard</TabsTrigger>
       <TabsTrigger value="demo" class="cursor-pointer">Demo</TabsTrigger>
-      <TabsTrigger value="demo token" class="cursor-pointer">
-        Demo Token
-      </TabsTrigger>
-      <TabsTrigger value="smart account" class="cursor-pointer">
-        Smart Account
-      </TabsTrigger>
-      <TabsTrigger value="register ens" class="cursor-pointer">
-        Register ENS
-      </TabsTrigger>
+      <TabsTrigger value="demo token" class="cursor-pointer">Token</TabsTrigger>
+      <TabsTrigger value="smart account" class="cursor-pointer"
+        >Smart</TabsTrigger
+      >
+      <TabsTrigger value="register ens" class="cursor-pointer">ENS</TabsTrigger>
     </TabsList>
+
+    <TabsContent value="create">
+      <CreateAccount />
+    </TabsContent>
 
     <TabsContent value="onboard">
       <Onboard />
