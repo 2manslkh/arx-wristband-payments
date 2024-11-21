@@ -17,6 +17,7 @@
   import { transferToken } from "$lib/SmartAccount/transfer";
   import { tokenAddress } from "../../generated";
   import AmountKeypad from "./AmountKeypad.svelte";
+  import TransactionLink from "./TransactionLink.svelte";
 
   // Constants
   let amount = $state("0");
@@ -150,11 +151,7 @@
     {/if}
 
     {#if txLink}
-      <Button variant="link" class="mt-2">
-        <a href={txLink} target="_blank" rel="noopener noreferrer">
-          View transaction
-        </a>
-      </Button>
+      <TransactionLink href={txLink} />
     {/if}
   </Card.Content>
 </Card.Root>
