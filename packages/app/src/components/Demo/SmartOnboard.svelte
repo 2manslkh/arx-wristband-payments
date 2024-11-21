@@ -29,8 +29,10 @@
   // Reactive variables
   let statusMessage = "";
 
-  let ethBalance = "0";
-  let coinBalance = "0";
+  let haloEthBalance = "0";
+  let haloCoinBalance = "0";
+  let smartEthBalance = "0";
+  let smartCoinBalance = "0";
   let introText = "Welcome to EasyPay";
   let showNfcIcon = false;
   let showBalanceInfo = false;
@@ -84,16 +86,23 @@
     }
   }
 
-  async function displayBalance(address: Address) {
+  async function displayBalance(haloAddress: Address) {
     try {
       const client = createPublicClient({
         chain: baseSepolia,
         transport: http("https://sepolia.base.org"),
       });
 
-      const balance = (await client.getBalance({ address })) as bigint;
-      ethBalance = formatEther(balance);
+      // Get ETH balances
+      const [haloBalance, smartBalance] = await Promise.all([
+        client.getBalance({ address: haloAddress }),
+        client.getBalance({ address: getSmartAccountAddress() }),
+      ]);
 
+      haloEthBalance = formatEther(haloBalance);
+      smartEthBalance = formatEther(smartBalance);
+
+      // Get COIN balances
       const coinContractAddress = tokenAddress[84532];
       const coinAbi = [
         {
@@ -104,17 +113,27 @@
           stateMutability: "view",
         },
       ];
-      const coinBalanceWei = (await client.readContract({
-        address: coinContractAddress,
-        abi: coinAbi,
-        functionName: "balanceOf",
-        args: [address],
-      })) as bigint;
-      coinBalance = formatEther(coinBalanceWei);
+
+      const [haloCoinBalanceWei, smartCoinBalanceWei] = await Promise.all([
+        client.readContract({
+          address: coinContractAddress,
+          abi: coinAbi,
+          functionName: "balanceOf",
+          args: [haloAddress],
+        }),
+        client.readContract({
+          address: coinContractAddress,
+          abi: coinAbi,
+          functionName: "balanceOf",
+          args: [getSmartAccountAddress()],
+        }),
+      ]);
+
+      haloCoinBalance = formatEther(haloCoinBalanceWei as bigint);
+      smartCoinBalance = formatEther(smartCoinBalanceWei as bigint);
 
       introText = "Welcome Back,";
       showNfcIcon = false;
-
       showBalanceInfo = true;
     } catch (error) {
       console.error("Failed to fetch balance:", error);
@@ -184,24 +203,53 @@
     {/if}
 
     {#if showBalanceInfo}
-      <div class="w-full space-y-4">
-        <div
-          class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-        >
-          <div class="flex items-center gap-2">
-            <Wallet class="w-5 h-5" />
-            <span>ETH Balance</span>
+      <div class="w-full space-y-6">
+        <!-- Halo Wallet Balances -->
+        <div class="space-y-2">
+          <h3 class="text-sm font-medium text-muted-foreground">Halo Wallet</h3>
+          <div
+            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
+          >
+            <div class="flex items-center gap-2">
+              <Wallet class="w-5 h-5" />
+              <span>ETH Balance</span>
+            </div>
+            <span class="font-mono">{haloEthBalance}</span>
           </div>
-          <span class="font-mono">{ethBalance}</span>
+          <div
+            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
+          >
+            <div class="flex items-center gap-2">
+              <Wallet class="w-5 h-5" />
+              <span>COIN Balance</span>
+            </div>
+            <span class="font-mono">{haloCoinBalance}</span>
+          </div>
         </div>
-        <div
-          class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-        >
-          <div class="flex items-center gap-2">
-            <Wallet class="w-5 h-5" />
-            <span>COIN Balance</span>
+
+        <!-- Smart Account Balances -->
+        <div class="space-y-2">
+          <h3 class="text-sm font-medium text-muted-foreground">
+            Smart Account
+          </h3>
+          <div
+            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
+          >
+            <div class="flex items-center gap-2">
+              <Wallet class="w-5 h-5" />
+              <span>ETH Balance</span>
+            </div>
+            <span class="font-mono">{smartEthBalance}</span>
           </div>
-          <span class="font-mono">{coinBalance}</span>
+          <div
+            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
+          >
+            <div class="flex items-center gap-2">
+              <Wallet class="w-5 h-5" />
+              <span>COIN Balance</span>
+            </div>
+            <span class="font-mono">{smartCoinBalance}</span>
+          </div>
         </div>
       </div>
     {/if}
