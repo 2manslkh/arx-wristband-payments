@@ -28,6 +28,8 @@
   import { getStatus, getTransactionLink } from "$stores/status.svelte";
   import { registerENS, setPrimaryName } from "$lib/ens/ens";
   import { wagmiConfig } from "$lib/wagmi";
+  import { Input } from "$lib/components/ui/input";
+  import { Label } from "$lib/components/ui/label";
 
   // Reactive variables
   let statusMessage = "";
@@ -42,6 +44,18 @@
   let showStartButton = true;
   let isLoading = false;
 
+  // Add username state
+  let username = "";
+  let isValidUsername = false;
+  
+  function validateUsername(value: string) {
+    // Only allow lowercase letters, numbers, and hyphens
+    const validPattern = /^[a-z0-9-]+$/;
+    const isValid = value.length >= 3 && value.length <= 20 && validPattern.test(value);
+    isValidUsername = isValid;
+    return isValid;
+  }
+
   function showStatus(message: string) {
     statusMessage = message;
     // You might want to add logic here to show/hide the status message
@@ -50,14 +64,23 @@
   async function startOnboarding() {
     isLoading = true;
     try {
+      if (!validateUsername(username)) {
+        throw new Error("Invalid username. Use only lowercase letters, numbers, and hyphens (3-20 characters)");
+      }
+
       const haloChipAddress = await retrieveHaloAddress();
       const wallet = (await retrieveHaloAccount()) as LocalAccount;
       const smartAccountClient = await getSmartClient(wallet);
 
-      showStatus("Creating ens name...");
+      showStatus("Creating smart account...");
+      await smartAccount(wallet);
+      showStatus("Smart account created successfully!");
 
-      await registerENS(wagmiConfig, smartAccountClient, name, wallet.address);
-      await setPrimaryName(wagmiConfig, name);
+      const ensName = `${username}.zupay.eth`;
+      showStatus(`Registering ${ensName}...`);
+      
+      await registerENS(wagmiConfig, smartAccountClient, ensName, wallet.address);
+      await setPrimaryName(wagmiConfig, ensName);
 
       showStatus("ENS name created successfully!");
 
@@ -151,6 +174,28 @@
 <Card.Root class="mt-8">
   <Card.Header>
     <Card.Title class="text-2xl text-center">{introText}</Card.Title>
+    {#if showStartButton}
+      <div class="w-full max-w-sm mx-auto mt-4">
+        <Label for="username">Choose your username</Label>
+        <div class="relative mt-1.5">
+          <Input
+            id="username"
+            type="text"
+            bind:value={username}
+            on:input={(e) => validateUsername(e.currentTarget.value)}
+            placeholder="username"
+            class="pr-16"
+          />
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
+            .zupay.eth
+          </div>
+        </div>
+        <p class="text-xs text-muted-foreground mt-1">
+          Use lowercase letters, numbers, and hyphens (3-20 characters)
+        </p>
+      </div>
+    {/if}
+
     {#if getHaloAddress()}
       <Card.Description class="text-center text-lg font-mono">
         <div class="flex flex-col gap-1">
@@ -267,7 +312,11 @@
     {/if}
 
     {#if showStartButton}
-      <Button class="w-full" on:click={handleBeginRequest} disabled={isLoading}>
+      <Button 
+        class="w-full" 
+        on:click={handleBeginRequest} 
+        disabled={isLoading || !isValidUsername}
+      >
         {#if isLoading}
           <Loader2 class="mr-2 h-4 w-4 animate-spin" />
         {/if}
