@@ -4,16 +4,15 @@ import {
 	serializeTransaction,
 	type Hex,
 	type TypedDataDomain,
+	hashTypedData,
+	type SignableMessage,
+	hashMessage,
 	zeroAddress,
 	type Address,
 } from 'viem';
 
-import { _TypedDataEncoder, hashMessage } from '@ethersproject/hash';
-
 import { toAccount } from 'viem/accounts';
 import { hexlify, type BytesLike } from '@ethersproject/bytes';
-import type { TypedDataField } from '@ethersproject/abstract-signer';
-
 
 export async function retrieveHaloAddress() {
 	if (getHaloAddress() === zeroAddress) {
@@ -37,20 +36,18 @@ async function signDigest(digest: BytesLike): Promise<string> {
 }
 
 export async function retrieveHaloAccount() {
-
 	if (getHaloAccount() === null) {
 		let haloAddress: Address = zeroAddress;
 		haloAddress = await retrieveHaloAddress();
 		const haloAccount = toAccount({
 			address: haloAddress,
 			async signMessage({ message }) {
-				const messageHash = hashMessage(message.toString());
+				const messageHash = hashMessage(message);
 				const signature = await signDigest(messageHash);
 				return signature as Hex;
 			},
 
 			async signTransaction(transaction) {
-				// Implement using signDigest
 				const serializedTransaction = serializeTransaction(transaction);
 				const transactionHash = hexlify(serializedTransaction);
 				const signature = await signDigest(transactionHash);
@@ -58,18 +55,19 @@ export async function retrieveHaloAccount() {
 			},
 
 			async signTypedData(typedData) {
-				const { domain, types, message } = typedData;
+				const { domain, types, message, primaryType } = typedData;
+				console.log("🚀 | signTypedData | typedData:", typedData)
 
-				// Remove EIP712Domain from types
-				// const { ...otherTypes } = types;
+				const { EIP712Domain: _, ...filteredTypes } = types;
 
-				const signature = await signDigest(
-					_TypedDataEncoder.hash(
-						domain as TypedDataDomain,
-						types as Record<string, Array<TypedDataField>>,
-						message as Record<string, any>
-					)
-				);
+				const hash = hashTypedData({
+					domain,
+					types: filteredTypes,
+					primaryType: primaryType,
+					message
+				});
+
+				const signature = await signDigest(hash);
 				return signature as Hex;
 			}
 		});

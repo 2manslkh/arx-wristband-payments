@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { createSmartAccountClient } from 'permissionless';
-import { toSafeSmartAccount } from 'permissionless/accounts';
+import { createSmartAccountClient, type SmartAccountClient } from 'permissionless';
+import { toSafeSmartAccount, type SafeSmartAccountImplementation } from 'permissionless/accounts';
 import { createPimlicoClient } from 'permissionless/clients/pimlico';
-import { createPublicClient, getContract, http, parseEther, type LocalAccount } from 'viem';
+import { createPublicClient, getContract, http, parseEther, type Address, type LocalAccount } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { PUBLIC_PIMLICO_API_KEY } from '$env/static/public';
 
@@ -11,6 +11,7 @@ if (!apiKey) throw new Error('Missing PIMLICO_API_KEY');
 
 import { entryPoint07Address } from 'viem/account-abstraction';
 import { tokenAbi, tokenAddress } from '../../generated';
+import { setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
 
 export async function smartAccount(signer: LocalAccount) {
 	console.log("🚀 | smartAccount | signer:", signer)
@@ -39,7 +40,7 @@ export async function smartAccount(signer: LocalAccount) {
 		version: '1.4.1'
 	});
 
-	const smartAccountClient = createSmartAccountClient({
+	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
 		account: safeAccount,
 		chain: baseSepolia,
 		paymaster: paymasterClient,
@@ -49,6 +50,14 @@ export async function smartAccount(signer: LocalAccount) {
 		}
 	});
 
+	setSmartAccount(smartAccountClient);
+
+	if (smartAccountClient.account) {
+		setSmartAccountAddress(smartAccountClient.account.address as Address);
+	} else {
+		throw new Error('Smart account client account is undefined');
+	}
+
 	console.info('Step 5: Creating smart account client');
 
 	console.info('Step 6: Sending test transaction');
@@ -56,6 +65,7 @@ export async function smartAccount(signer: LocalAccount) {
 		to: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
 		value: 0n,
 	});
+
 	console.info(`User operation included: https://sepolia.basescan.org/tx/${txHash}`);
 
 	console.info('Step 8: Calling drip function');

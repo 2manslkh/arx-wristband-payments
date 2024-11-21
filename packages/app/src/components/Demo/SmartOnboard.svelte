@@ -7,12 +7,6 @@
   import {
     createPublicClient,
     http,
-    parseEther,
-    serializeTransaction,
-    keccak256,
-    createWalletClient,
-    type TransactionSerializable,
-    type Signature,
     type Address,
     formatEther,
     type LocalAccount,
@@ -26,19 +20,23 @@
     retrieveHaloAddress,
   } from "$lib/SmartAccount/HaloAccount";
   import { smartAccount } from "$lib/SmartAccount/SmartAccount";
+  import {
+    getHaloAddress,
+    getSmartAccountAddress,
+  } from "$stores/account.svelte";
 
   // Reactive variables
   let statusMessage = "";
-  let linkHref = "";
-  let linkText = "";
+
   let ethBalance = "0";
   let coinBalance = "0";
   let introText = "Welcome to EasyPay";
   let showNfcIcon = false;
-  let ethAddress = "";
   let showBalanceInfo = false;
   let showStartButton = true;
   let isLoading = false;
+  let linkHref = "";
+  let linkText = "";
 
   function showStatus(message: string) {
     statusMessage = message;
@@ -65,14 +63,7 @@
   async function startOnboarding() {
     isLoading = true;
     try {
-      showStatus("Processing faucet request...");
-
-      const nfcResult = await execHaloCmdWeb(
-        { name: "get_pkeys" },
-        { statusCallback: updateStatus, method: "webnfc" }
-      );
-
-      const recipientAddress = await retrieveHaloAddress();
+      const haloChipAddress = await retrieveHaloAddress();
       const wallet = (await retrieveHaloAccount()) as LocalAccount;
 
       showStatus("Creating smart account...");
@@ -122,7 +113,7 @@
 
       introText = "Welcome Back,";
       showNfcIcon = false;
-      ethAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+
       showBalanceInfo = true;
     } catch (error) {
       console.error("Failed to fetch balance:", error);
@@ -145,9 +136,10 @@
 <Card.Root class="mt-8">
   <Card.Header>
     <Card.Title class="text-2xl text-center">{introText}</Card.Title>
-    {#if ethAddress}
+    {#if getHaloAddress()}
       <Card.Description class="text-center text-lg font-mono">
-        {ethAddress}
+        {getHaloAddress()}
+        {getSmartAccountAddress()}
       </Card.Description>
     {/if}
   </Card.Header>
