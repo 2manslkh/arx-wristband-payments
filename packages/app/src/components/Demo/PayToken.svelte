@@ -8,24 +8,23 @@
     createPublicClient,
     http,
     parseEther,
-    serializeTransaction,
-    keccak256,
-    createWalletClient,
-    type TransactionSerializable,
-    type Signature,
     type LocalAccount,
   } from "viem";
   import { base, baseSepolia } from "viem/chains";
-  import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
   import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
   import { retrieveHaloAccount } from "$lib/SmartAccount/HaloAccount";
   import { getSmartClient } from "$lib/SmartAccount/SmartAccount";
   import { transferToken } from "$lib/SmartAccount/transfer";
   import { tokenAddress } from "../../generated";
+  import AmountKeypad from "./AmountKeypad.svelte";
 
   // Constants
-  const amount = "6.9";
-  const recipientAddress = "0x985A29E88E75394DbDaE41a269409f701ccf6a43";
+  let amount = $state("0");
+  // Add loading state
+  let isLoading = $state(false);
+  let status = $state("");
+  let txLink = $state("");
+  const recipientAddress = "0x88827a6d3693F33Bb4Ab61adc5a880Baa4B333bD";
   const baseRpcUrl = "https://sepolia.base.org";
 
   // Create Viem client
@@ -35,8 +34,6 @@
   });
 
   // Reactive variables
-  let status = "";
-  let txLink = "";
 
   // Function to show status
   function showStatus(message: string) {
@@ -74,9 +71,6 @@
     };
     showStatus(messages[status] || `${status}, ${execMethod}`);
   }
-
-  // Add loading state
-  let isLoading = false;
 
   // Main payment function
   async function handlePayment() {
@@ -120,17 +114,20 @@
 <Card.Root class="mt-8">
   <Card.Header>
     <Card.Title class="text-2xl text-center">ZuPay on Base</Card.Title>
-    <Card.Description class="text-3xl font-bold text-center">
-      {amount} Token
-    </Card.Description>
   </Card.Header>
 
   <Card.Content class="flex flex-col items-center gap-6">
+    <AmountKeypad bind:amount />
+
     <div class="p-8 rounded-full bg-primary/10">
       <CreditCard class="w-12 h-12 text-primary" />
     </div>
 
-    <Button class="w-full" disabled={isLoading} on:click={handlePayment}>
+    <Button
+      class="w-full"
+      disabled={isLoading || !amount || amount === "0"}
+      on:click={handlePayment}
+    >
       {#if isLoading}
         <Loader2 class="mr-2 h-4 w-4 animate-spin" />
       {/if}

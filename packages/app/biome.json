@@ -6,7 +6,13 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "style": {
+        "useConst": "off"
+      }
     }
   },
   "formatter": {
@@ -14,7 +20,8 @@
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 120
+    "lineWidth": 120,
+    "ignore": ["**/*.svelte"]
   },
   "javascript": {
     "formatter": {
