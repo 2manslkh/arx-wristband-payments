@@ -60,14 +60,6 @@ export async function smartAccount(signer: LocalAccount) {
 
 	console.info('Step 5: Creating smart account client');
 
-	console.info('Step 6: Sending test transaction');
-	const txHash = await smartAccountClient.sendTransaction({
-		to: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
-		value: 0n,
-	});
-
-	console.info(`User operation included: https://sepolia.basescan.org/tx/${txHash}`);
-
 	console.info('Step 8: Calling drip function');
 
 	const tokenContract = getContract({
@@ -78,9 +70,7 @@ export async function smartAccount(signer: LocalAccount) {
 			wallet: smartAccountClient
 		}
 	});
-	const dripTx = await tokenContract.write.faucet([
-		smartAccountClient.account.address,
-	]);
+	const dripTx = await tokenContract.write.faucet([smartAccountClient.account.address]);
 
 	console.info(`Token drip transaction sent. Hash: ${dripTx}`);
 	console.info('Waiting for drip transaction receipt...');

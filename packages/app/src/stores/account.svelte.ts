@@ -3,7 +3,7 @@ import { zeroAddress, type Account, type Address } from "viem";
 
 let haloAccount = $state<Account | null>(null);
 let haloAddress = $state<Address>(zeroAddress);
-let smartAccount = $state<any | null>(null);
+let smartAccount = $state<SmartAccountClient | null>(null);
 let smartAccountAddress = $state<Address>(zeroAddress);
 
 

@@ -24,6 +24,7 @@
     getHaloAddress,
     getSmartAccountAddress,
   } from "$stores/account.svelte";
+  import { getStatus } from "$stores/status.svelte";
 
   // Reactive variables
   let statusMessage = "";
@@ -130,6 +131,15 @@
     }, 500);
   }
 
+  function truncateAddress(address: string | null | undefined) {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  }
+
+  function getExplorerUrl(address: string) {
+    return `https://sepolia.basescan.org/address/${address}`;
+  }
+
   onMount(() => {});
 </script>
 
@@ -138,8 +148,30 @@
     <Card.Title class="text-2xl text-center">{introText}</Card.Title>
     {#if getHaloAddress()}
       <Card.Description class="text-center text-lg font-mono">
-        {getHaloAddress()}
-        {getSmartAccountAddress()}
+        <div class="flex flex-col gap-1">
+          <span>
+            Halo:
+            <a
+              href={getExplorerUrl(getHaloAddress())}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-primary transition-colors"
+            >
+              {truncateAddress(getHaloAddress())}
+            </a>
+          </span>
+          <span>
+            Smart:
+            <a
+              href={getExplorerUrl(getSmartAccountAddress())}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-primary transition-colors"
+            >
+              {truncateAddress(getSmartAccountAddress())}
+            </a>
+          </span>
+        </div>
       </Card.Description>
     {/if}
   </Card.Header>
@@ -183,17 +215,17 @@
       </Button>
     {/if}
 
-    {#if statusMessage}
+    {#if getStatus()}
       <div class="w-full max-h-24 overflow-y-auto">
         <p
           class={cn(
             "text-sm text-center break-words whitespace-pre-wrap",
-            statusMessage.toLowerCase().includes("failed")
+            getStatus().toLowerCase().includes("failed")
               ? "text-destructive"
               : "text-muted-foreground"
           )}
         >
-          {statusMessage}
+          {getStatus()}
         </p>
       </div>
     {/if}

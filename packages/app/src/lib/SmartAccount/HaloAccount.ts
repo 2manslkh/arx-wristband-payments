@@ -13,10 +13,23 @@ import {
 
 import { toAccount } from 'viem/accounts';
 import { hexlify, type BytesLike } from '@ethersproject/bytes';
+import { setStatus } from '$stores/status.svelte';
+import type { StatusCallbackDetails } from '@arx-research/libhalo/types';
+
+function defaultHaloCallback(status: string, execMethod: StatusCallbackDetails) {
+	console.info(status, execMethod);
+	const messages: { [key: string]: string } = {
+		init: "Please tap your Halo card to the back of your smartphone.",
+		again: "Processing..",
+		retry: "There was an error. Please try tapping your card again.",
+		finished: "Processing...",
+	};
+	setStatus(messages[status] || `${status}, ${execMethod}`);
+}
 
 export async function retrieveHaloAddress() {
 	if (getHaloAddress() === zeroAddress) {
-		const nfcResult = await execHaloCmdWeb({ name: 'get_pkeys' }, { method: 'webnfc' });
+		const nfcResult = await execHaloCmdWeb({ name: 'get_pkeys' }, { method: 'webnfc', statusCallback: defaultHaloCallback });
 		setHaloAddress(nfcResult.etherAddresses['1'] as `0x${string}`);
 	}
 	return getHaloAddress();
@@ -29,7 +42,7 @@ async function signDigest(digest: BytesLike): Promise<string> {
 			keyNo: 1,
 			digest: hexlify(digest).substring(2)
 		},
-		{ method: 'webnfc' }
+		{ method: 'webnfc', statusCallback: defaultHaloCallback }
 	);
 
 	return res.signature.ether;
