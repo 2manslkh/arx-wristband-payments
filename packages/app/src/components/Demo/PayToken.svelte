@@ -13,13 +13,18 @@
     createWalletClient,
     type TransactionSerializable,
     type Signature,
+    type LocalAccount,
   } from "viem";
   import { base, baseSepolia } from "viem/chains";
   import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
   import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
+  import { retrieveHaloAccount } from "$lib/SmartAccount/HaloAccount";
+  import { getSmartClient } from "$lib/SmartAccount/SmartAccount";
+  import { transferToken } from "$lib/SmartAccount/transfer";
+  import { tokenAddress } from "../../generated";
 
   // Constants
-  const amount = "0.00001";
+  const amount = "6.9";
   const recipientAddress = "0x985A29E88E75394DbDaE41a269409f701ccf6a43";
   const baseRpcUrl = "https://sepolia.base.org";
 
@@ -77,60 +82,24 @@
   async function handlePayment() {
     isLoading = true;
     try {
-      const nfcResult = await execHaloCmdWeb(
-        { name: "get_pkeys" },
-        {
-          method: "webnfc",
-          statusCallback: updateStatus,
-        }
+      const wallet = (await retrieveHaloAccount()) as LocalAccount;
+      const smartAccount = await getSmartClient(wallet);
+
+      const { transactionHash } = await transferToken(
+        smartAccount,
+        tokenAddress[84532] as `0x${string}`,
+        recipientAddress,
+        parseEther(amount)
       );
 
-      const [nonce, gasPrice] = await Promise.all([
-        publicClient.getTransactionCount({
-          address: nfcResult.etherAddresses["1"],
-        }),
-        publicClient.getGasPrice(),
-      ]);
-
-      const transaction: TransactionSerializable = {
-        to: recipientAddress,
-        value: parseEther(amount),
-        nonce,
-        gas: 21000n,
-        gasPrice,
-        chainId: baseSepolia.id,
-      };
-
-      const serializedTx = serializeTransaction(transaction);
-      const digest = keccak256(serializedTx).slice(2);
-
-      const signedTxResult = await execHaloCmdWeb(
-        { name: "sign", digest, keyNo: 1 },
-        {
-          method: "webnfc",
-          statusCallback: updateStatusPhase2,
-        }
-      );
-
-      const signature: Signature = {
-        r: `0x${signedTxResult.signature.raw.r}`,
-        s: `0x${signedTxResult.signature.raw.s}`,
-        v: BigInt(signedTxResult.signature.raw.v),
-      };
-
-      const walletClient = createWalletClient({
-        chain: baseSepolia,
-        transport: http(baseRpcUrl),
-      });
-
-      const hash = await walletClient.sendRawTransaction({
-        serializedTransaction: serializeTransaction(transaction, signature),
-      });
+      if (!transactionHash) {
+        throw new Error("Transaction hash is undefined");
+      }
 
       showStatus("Confirming on blockchain...");
-      await publicClient.waitForTransactionReceipt({ hash });
+      await publicClient.waitForTransactionReceipt({ hash: transactionHash });
       showStatus("Payment Successful!");
-      showLink(hash);
+      showLink(transactionHash);
     } catch (error) {
       console.error("Payment failed:", error);
       if (error instanceof Error) {
@@ -150,7 +119,7 @@
 
 <Card.Root class="mt-8">
   <Card.Header>
-    <Card.Title class="text-2xl text-center">EasyPay on Base</Card.Title>
+    <Card.Title class="text-2xl text-center">ZuPay on Base</Card.Title>
     <Card.Description class="text-3xl font-bold text-center">
       {amount} Token
     </Card.Description>

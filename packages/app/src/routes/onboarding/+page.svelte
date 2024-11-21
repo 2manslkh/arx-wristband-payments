@@ -16,7 +16,7 @@
   let linkText = "";
   let ethBalance = "0";
   let coinBalance = "0";
-  let introText = "Welcome to EasyPay";
+  let introText = "Welcome to ZuPay";
   let showNfcIcon = false;
   let ethAddress = "";
   let showBalanceInfo = false;

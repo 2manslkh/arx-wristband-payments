@@ -14,7 +14,7 @@ contract TokenTest is Test {
         user = makeAddr("user");
 
         vm.startPrank(owner);
-        token = new Token("EasyPay Token", "EPT", 1_000_000);
+        token = new Token("ZuPay Token", "EPT", 1_000_000);
         vm.stopPrank();
     }
 

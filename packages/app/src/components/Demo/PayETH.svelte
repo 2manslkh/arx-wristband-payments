@@ -149,7 +149,7 @@
 
 <Card.Root class="mt-8">
   <Card.Header>
-    <Card.Title class="text-2xl text-center">EasyPay on Base</Card.Title>
+    <Card.Title class="text-2xl text-center">ZuPay on Base</Card.Title>
     <Card.Description class="text-3xl font-bold text-center">
       {amount} ETH
     </Card.Description>

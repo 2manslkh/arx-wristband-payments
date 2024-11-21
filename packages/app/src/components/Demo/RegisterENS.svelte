@@ -1,20 +1,12 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import * as Card from "$lib/components/ui/card";
   import { Button } from "$lib/components/ui/button";
-  import { CreditCard, Loader2, Wallet, ExternalLink } from "lucide-svelte";
+  import { Input } from "$lib/components/ui/input";
+  import { Label } from "$lib/components/ui/label";
+  import { CreditCard, Loader2, ExternalLink } from "lucide-svelte";
   import { cn } from "$lib/utils";
-  import {
-    createPublicClient,
-    http,
-    type Address,
-    formatEther,
-    type LocalAccount,
-  } from "viem";
-  import { base, baseSepolia } from "viem/chains";
-  import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
-  import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
-  import { tokenAddress } from "../../generated";
+  import type { LocalAccount } from "viem";
+
   import {
     retrieveHaloAccount,
     retrieveHaloAddress,
@@ -22,131 +14,64 @@
   import { getSmartClient, smartAccount } from "$lib/SmartAccount/SmartAccount";
   import {
     getHaloAddress,
-    getSmartAccount,
     getSmartAccountAddress,
   } from "$stores/account.svelte";
-  import { getStatus, getTransactionLink } from "$stores/status.svelte";
+  import {
+    getStatus,
+    getTransactionLink,
+    setStatus,
+  } from "$stores/status.svelte";
   import { registerENS, setPrimaryName } from "$lib/ens/ens";
   import { wagmiConfig } from "$lib/wagmi";
-  import { Input } from "$lib/components/ui/input";
-  import { Label } from "$lib/components/ui/label";
 
   // Reactive variables
-  let statusMessage = "";
+  let isValidUsername = $state(false);
+  let isLoading = $state(false);
+  let mintedEnsName = $state("");
+  let showStartButton = $state(true);
+  let showNfcIcon = $state(false);
+  let introText = $state("Welcome to ZuPay");
+  let username = $state("");
 
-  let haloEthBalance = "0";
-  let haloCoinBalance = "0";
-  let smartEthBalance = "0";
-  let smartCoinBalance = "0";
-  let introText = "Welcome to EasyPay";
-  let showNfcIcon = false;
-  let showBalanceInfo = false;
-  let showStartButton = true;
-  let isLoading = false;
-
-  // Add username state
-  let username = "";
-  let isValidUsername = false;
-  
   function validateUsername(value: string) {
-    // Only allow lowercase letters, numbers, and hyphens
     const validPattern = /^[a-z0-9-]+$/;
-    const isValid = value.length >= 3 && value.length <= 20 && validPattern.test(value);
-    isValidUsername = isValid;
-    return isValid;
+    isValidUsername =
+      value.length >= 3 && value.length <= 20 && validPattern.test(value);
+    return isValidUsername;
   }
 
-  function showStatus(message: string) {
-    statusMessage = message;
-    // You might want to add logic here to show/hide the status message
-  }
-
-  async function startOnboarding() {
+  async function mintEns() {
     isLoading = true;
     try {
       if (!validateUsername(username)) {
-        throw new Error("Invalid username. Use only lowercase letters, numbers, and hyphens (3-20 characters)");
+        throw new Error(
+          "Invalid username. Use only lowercase letters, numbers, and hyphens (3-20 characters)"
+        );
       }
 
-      const haloChipAddress = await retrieveHaloAddress();
       const wallet = (await retrieveHaloAccount()) as LocalAccount;
       const smartAccountClient = await getSmartClient(wallet);
 
-      showStatus("Creating smart account...");
-      await smartAccount(wallet);
-      showStatus("Smart account created successfully!");
-
       const ensName = `${username}.zupay.eth`;
-      showStatus(`Registering ${ensName}...`);
-      
-      await registerENS(wagmiConfig, smartAccountClient, ensName, wallet.address);
+      setStatus(`Registering ${ensName}...`);
+
+      await registerENS(
+        wagmiConfig,
+        smartAccountClient,
+        ensName,
+        wallet.address
+      );
       await setPrimaryName(wagmiConfig, ensName);
 
-      showStatus("ENS name created successfully!");
-
-      await displayBalance(wallet.address);
+      mintedEnsName = ensName;
+      setStatus("ENS name created successfully!");
     } catch (error) {
       console.error("Onboarding failed:", error);
-      showStatus(
-        `Onboarding Failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      setStatus(
+        `Registration Failed: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     } finally {
       isLoading = false;
-    }
-  }
-
-  async function displayBalance(haloAddress: Address) {
-    try {
-      const client = createPublicClient({
-        chain: baseSepolia,
-        transport: http("https://sepolia.base.org"),
-      });
-
-      // Get ETH balances
-      const [haloBalance, smartBalance] = await Promise.all([
-        client.getBalance({ address: haloAddress }),
-        client.getBalance({ address: getSmartAccountAddress() }),
-      ]);
-
-      haloEthBalance = formatEther(haloBalance);
-      smartEthBalance = formatEther(smartBalance);
-
-      // Get COIN balances
-      const coinContractAddress = tokenAddress[84532];
-      const coinAbi = [
-        {
-          name: "balanceOf",
-          type: "function",
-          inputs: [{ name: "account", type: "address" }],
-          outputs: [{ name: "", type: "uint256" }],
-          stateMutability: "view",
-        },
-      ];
-
-      const [haloCoinBalanceWei, smartCoinBalanceWei] = await Promise.all([
-        client.readContract({
-          address: coinContractAddress,
-          abi: coinAbi,
-          functionName: "balanceOf",
-          args: [haloAddress],
-        }),
-        client.readContract({
-          address: coinContractAddress,
-          abi: coinAbi,
-          functionName: "balanceOf",
-          args: [getSmartAccountAddress()],
-        }),
-      ]);
-
-      haloCoinBalance = formatEther(haloCoinBalanceWei as bigint);
-      smartCoinBalance = formatEther(smartCoinBalanceWei as bigint);
-
-      introText = "Welcome Back,";
-      showNfcIcon = false;
-      showBalanceInfo = true;
-    } catch (error) {
-      console.error("Failed to fetch balance:", error);
-      showStatus("Failed to fetch balance");
     }
   }
 
@@ -155,7 +80,7 @@
     introText = "Tap your NFC Wristband to continue!";
     setTimeout(() => {
       showNfcIcon = true;
-      startOnboarding();
+      mintEns();
     }, 500);
   }
 
@@ -167,8 +92,6 @@
   function getExplorerUrl(address: string) {
     return `https://sepolia.basescan.org/address/${address}`;
   }
-
-  onMount(() => {});
 </script>
 
 <Card.Root class="mt-8">
@@ -186,7 +109,9 @@
             placeholder="username"
             class="pr-16"
           />
-          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
+          <div
+            class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground"
+          >
             .zupay.eth
           </div>
         </div>
@@ -233,88 +158,29 @@
       </div>
     {/if}
 
-    {#if showBalanceInfo}
-      <div class="w-full space-y-6">
-        <!-- Halo Wallet Balances -->
-        <div class="space-y-2">
+    {#if mintedEnsName}
+      <div class="w-full p-4 rounded-lg bg-primary/10 space-y-2">
+        <h3 class="text-sm font-medium text-center text-primary">
+          ENS Name Minted Successfully
+        </h3>
+        <div class="flex items-center justify-center gap-2">
+          <span class="font-mono text-lg">{mintedEnsName}</span>
           <a
-            href={getExplorerUrl(getHaloAddress())}
+            href={`https://sepolia.etherscan.io/enslookup-search?search=${mintedEnsName}`}
             target="_blank"
             rel="noopener noreferrer"
-            class="group inline-flex items-center gap-1 hover:text-primary transition-colors"
+            class="text-primary hover:text-primary/80 transition-colors"
           >
-            <h3
-              class="text-sm font-medium text-muted-foreground group-hover:text-primary"
-            >
-              Halo Wallet
-            </h3>
-            <ExternalLink
-              class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"
-            />
+            <ExternalLink class="w-4 h-4" />
           </a>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>ETH Balance</span>
-            </div>
-            <span class="font-mono">{haloEthBalance}</span>
-          </div>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>COIN Balance</span>
-            </div>
-            <span class="font-mono">{haloCoinBalance}</span>
-          </div>
-        </div>
-
-        <!-- Smart Account Balances -->
-        <div class="space-y-2">
-          <a
-            href={getExplorerUrl(getSmartAccountAddress())}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group inline-flex items-center gap-1 hover:text-primary transition-colors"
-          >
-            <h3
-              class="text-sm font-medium text-muted-foreground group-hover:text-primary"
-            >
-              Smart Account
-            </h3>
-            <ExternalLink
-              class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"
-            />
-          </a>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>ETH Balance</span>
-            </div>
-            <span class="font-mono">{smartEthBalance}</span>
-          </div>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>COIN Balance</span>
-            </div>
-            <span class="font-mono">{smartCoinBalance}</span>
-          </div>
         </div>
       </div>
     {/if}
 
     {#if showStartButton}
-      <Button 
-        class="w-full" 
-        on:click={handleBeginRequest} 
+      <Button
+        class="w-full"
+        on:click={handleBeginRequest}
         disabled={isLoading || !isValidUsername}
       >
         {#if isLoading}

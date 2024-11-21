@@ -33,7 +33,7 @@
   let haloCoinBalance = "0";
   let smartEthBalance = "0";
   let smartCoinBalance = "0";
-  let introText = "Welcome to EasyPay";
+  let introText = "Welcome to ZuPay";
   let showNfcIcon = false;
   let showBalanceInfo = false;
   let showStartButton = true;

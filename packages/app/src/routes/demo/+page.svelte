@@ -26,6 +26,7 @@
   import { PayETH, PayToken } from "$components/Demo";
   import Onboard from "$components/Demo/Onboard.svelte";
   import SmartOnboard from "$components/Demo/SmartOnboard.svelte";
+  import RegisterENS from "$components/Demo/RegisterENS.svelte";
 
   // Constants
   const amount = "0.00001";
@@ -164,9 +165,11 @@
       <TabsTrigger value="demo token" class="cursor-pointer">
         Demo Token
       </TabsTrigger>
-
       <TabsTrigger value="smart account" class="cursor-pointer">
         Smart Account
+      </TabsTrigger>
+      <TabsTrigger value="register ens" class="cursor-pointer">
+        Register ENS
       </TabsTrigger>
     </TabsList>
 
@@ -184,6 +187,10 @@
 
     <TabsContent value="smart account">
       <SmartOnboard />
+    </TabsContent>
+
+    <TabsContent value="register ens">
+      <RegisterENS />
     </TabsContent>
   </Tabs>
 </div>

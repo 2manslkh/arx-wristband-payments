@@ -50,6 +50,11 @@ export async function getSmartClient(signer: LocalAccount) {
 	});
 
 	setSmartAccount(smartAccountClient);
+	if (smartAccountClient.account) {
+		setSmartAccountAddress(smartAccountClient.account.address as Address);
+	} else {
+		throw new Error('Smart account client account is undefined');
+	}
 
 	return smartAccountClient;
 }
