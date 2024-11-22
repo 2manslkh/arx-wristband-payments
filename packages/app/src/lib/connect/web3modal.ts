@@ -7,7 +7,7 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { PUBLIC_REOWN_PROJECT_ID } from '$env/static/public'
 import { getAccount, getWalletClient as getWagmiWalletClient } from '@wagmi/core'
 import { EthereumProvider } from '@walletconnect/ethereum-provider'
-import { createWalletClient, http, type EIP1193Provider } from 'viem'
+import { createPublicClient, createWalletClient, http, type EIP1193Provider } from 'viem'
 import { getConnectorClient } from '@wagmi/core'
 
 // 1. Get a project ID at https://cloud.reown.com
@@ -56,6 +56,13 @@ export const web3modal = createAppKit({
 
 export async function getWalletClient() {
   return await getConnectorClient(wagmiAdapter.wagmiConfig)
+}
+
+export function getPublicClient() {
+  return createPublicClient({
+    chain: baseSepolia,
+    transport: http('https://sepolia.base.org')
+  })
 }
 
 // 5. Alternatively use w3m component buttons within the index.html file

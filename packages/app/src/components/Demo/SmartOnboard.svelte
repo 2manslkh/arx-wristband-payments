@@ -19,7 +19,7 @@
     retrieveHaloAccount,
     retrieveHaloAddress,
   } from "$lib/SmartAccount/HaloAccount";
-  import { smartAccount } from "$lib/SmartAccount/SmartAccount";
+  import { smartDemo } from "$lib/SmartAccount/SmartAccount";
   import {
     getHaloAddress,
     getSmartAccountAddress,
@@ -66,12 +66,12 @@
   async function startOnboarding() {
     isLoading = true;
     try {
-      const haloChipAddress = await retrieveHaloAddress();
       const wallet = (await retrieveHaloAccount()) as LocalAccount;
+      console.log("🚀 | startOnboarding | wallet:", wallet);
 
       showStatus("Creating smart account...");
 
-      await smartAccount(wallet);
+      await smartDemo(wallet);
 
       showStatus("Smart account created successfully!");
 

@@ -14,7 +14,7 @@
   import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
   import { retrieveHaloAccount } from "$lib/SmartAccount/HaloAccount";
   import { getSmartClient } from "$lib/SmartAccount/SmartAccount";
-  import { transferToken } from "$lib/SmartAccount/transfer";
+  import { transferToken } from "$lib/SmartAccount/smartTransfer";
   import { tokenAddress } from "../../generated";
   import AmountKeypad from "./AmountKeypad.svelte";
   import TransactionLink from "./TransactionLink.svelte";

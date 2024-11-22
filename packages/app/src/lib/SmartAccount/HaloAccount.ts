@@ -69,7 +69,6 @@ export async function retrieveHaloAccount() {
 
 			async signTypedData(typedData) {
 				const { domain, types, message, primaryType } = typedData;
-				console.log("🚀 | signTypedData | typedData:", typedData)
 
 				const { EIP712Domain: _, ...filteredTypes } = types;
 

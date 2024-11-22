@@ -9,9 +9,9 @@
 
   import {
     retrieveHaloAccount,
-    retrieveHaloAddress,
+    retrieveHaloAddress
   } from "$lib/SmartAccount/HaloAccount";
-  import { getSmartClient, smartAccount } from "$lib/SmartAccount/SmartAccount";
+  import { getSmartClient } from "$lib/SmartAccount/SmartAccount";
   import {
     getHaloAddress,
     getSmartAccountAddress,
