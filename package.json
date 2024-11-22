@@ -16,9 +16,6 @@
     "lint": "biome lint .",
     "check": "biome check --apply ."
   },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4"
-  },
   "dependencies": {
     "vite-plugin-node-polyfills": "^0.22.0"
   }

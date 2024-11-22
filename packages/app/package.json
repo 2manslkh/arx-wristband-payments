@@ -11,12 +11,9 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && biome check --apply .",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
     "wagmi": "bunx wagmi generate"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
     "@sveltejs/adapter-auto": "^3.3.1",
     "@sveltejs/kit": "^2.8.1",
     "@sveltejs/vite-plugin-svelte": "^4.0.1",
