@@ -12,8 +12,8 @@
   } from "viem";
   import { base, baseSepolia } from "viem/chains";
   import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
-  import { retrieveHaloAccount } from "$lib/SmartAccount/HaloAccount";
-  import { getSmartClient } from "$lib/SmartAccount/SmartAccount";
+  import { retrieveHaloAccount } from "$lib/SmartAccount/haloAccount";
+  import { getSmartClient } from "$lib/SmartAccount/smartAccount";
   import { transferToken } from "$lib/SmartAccount/smartTransfer";
   import { tokenAddress } from "../../generated";
   import AmountKeypad from "./AmountKeypad.svelte";

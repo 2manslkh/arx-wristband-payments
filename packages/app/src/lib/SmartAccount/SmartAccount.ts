@@ -1,13 +1,10 @@
 import { toSafeSmartAccount } from "permissionless/accounts"
 import 'dotenv/config';
 import { createSmartAccountClient, type SmartAccountClient } from 'permissionless';
-import { createPimlicoClient } from 'permissionless/clients/pimlico';
 import { createPublicClient, getContract, http, parseEther, type Address, type EIP1193Provider, type LocalAccount, type WalletClient } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { PUBLIC_PIMLICO_API_KEY } from '$env/static/public';
 
-const apiKey = PUBLIC_PIMLICO_API_KEY;
-if (!apiKey) throw new Error('Missing PIMLICO_API_KEY');
 
 import { entryPoint07Address, toCoinbaseSmartAccount } from 'viem/account-abstraction';
 import { tokenAbi, tokenAddress } from '../../generated';
@@ -18,18 +15,7 @@ import { getAddressFromPublicKey } from '$lib/util/getAddressFromPublicKey';
 import { publicClient, paymasterClient } from './pimlico';
 
 export async function getPasskeySmartClient() {
-	const publicClient = createPublicClient({
-		chain: baseSepolia,
-		transport: http('https://sepolia.base.org')
-	});
 
-	const paymasterClient = createPimlicoClient({
-		transport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${apiKey}`),
-		entryPoint: {
-			address: entryPoint07Address,
-			version: '0.7'
-		}
-	});
 
 	const owner = await getOwnerFromPasskey();
 
@@ -45,7 +31,7 @@ export async function getPasskeySmartClient() {
 		account: coinbaseAccount,
 		chain: baseSepolia,
 		paymaster: paymasterClient,
-		bundlerTransport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${apiKey}`),
+		bundlerTransport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`),
 		userOperation: {
 			estimateFeesPerGas: async () => (await paymasterClient.getUserOperationGasPrice()).fast
 		}
@@ -56,8 +42,7 @@ export async function getPasskeySmartClient() {
 }
 
 
-export async function getSmartClient(x: LocalAccount | WalletClient) {
-	console.log("🚀 | getSmartClient | signer:", signer)
+export async function getSmartClient(signer: LocalAccount) {
 
 	const safeAccount = await toSafeSmartAccount({
 		client: publicClient,
@@ -66,15 +51,14 @@ export async function getSmartClient(x: LocalAccount | WalletClient) {
 			version: "0.7"
 		},
 		owners: [signer], // Changed to provide address directly
-		safeVersion: "1.4.1",  // changed from version to safeVersion
+		version: "1.4.1"
 	});
-	console.log("🚀 | getSmartClient | safeAccount:", safeAccount)
 
 	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
 		account: safeAccount,
 		chain: baseSepolia,
 		paymaster: paymasterClient,
-		bundlerTransport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${apiKey}`),
+		bundlerTransport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`),
 		userOperation: {
 			estimateFeesPerGas: async () => (await paymasterClient.getUserOperationGasPrice()).fast
 		}

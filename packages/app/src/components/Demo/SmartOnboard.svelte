@@ -18,8 +18,8 @@
   import {
     retrieveHaloAccount,
     retrieveHaloAddress,
-  } from "$lib/SmartAccount/HaloAccount";
-  import { smartDemo } from "$lib/SmartAccount/SmartAccount";
+  } from "$lib/SmartAccount/haloAccount";
+  import { smartDemo } from "$lib/SmartAccount/smartAccount";
   import {
     getHaloAddress,
     getSmartAccountAddress,

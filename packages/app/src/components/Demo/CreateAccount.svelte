@@ -5,7 +5,7 @@
   import { Wallet, ExternalLink } from "lucide-svelte";
   import {
     getPasskeyOwnerAddress,
-    getSmartAccount,
+  getSmartAccount,
     getSmartAccountAddress,
     setSmartAccount,
     setSmartAccountAddress,
