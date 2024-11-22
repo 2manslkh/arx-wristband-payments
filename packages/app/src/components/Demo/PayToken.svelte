@@ -47,32 +47,6 @@
     txLink = `https://sepolia.basescan.org/tx/${txHash}`;
   }
 
-  // Status update functions
-  function updateStatus(status: string, execMethod: StatusCallbackDetails) {
-    console.info(status, execMethod);
-    const messages: { [key: string]: string } = {
-      init: "Please tap your Halo card to the back of your smartphone.",
-      again: "Processing (1/2)..",
-      retry: "There was an error. Please try tapping your card again.",
-      finished: "Processing (1/2)...",
-    };
-    showStatus(messages[status] || `${status}, ${execMethod}`);
-  }
-
-  function updateStatusPhase2(
-    status: string,
-    execMethod: StatusCallbackDetails
-  ) {
-    console.info(status, execMethod);
-    const messages: { [key: string]: string } = {
-      init: "Processing (2/2).",
-      again: "Processing (2/2)..",
-      retry: "There was an error. Please try tapping your card again.",
-      finished: "Processing (2/2)...",
-    };
-    showStatus(messages[status] || `${status}, ${execMethod}`);
-  }
-
   // Main payment function
   async function handlePayment() {
     isLoading = true;
