@@ -1,8 +1,8 @@
-import { createPasskey, signInWithPasskey, verifyPasskey, type PasskeyCredential } from '$lib/SmartAccount/passkeys';
-import { storePasskey, getStoredPasskey, type StoredPasskey } from '$lib/SmartAccount/storage';
+import { createPasskey, signInWithPasskey, verifyPasskey, type PasskeyCredential } from '$lib/smartAccount/passkeys';
+import { storePasskey, getStoredPasskey, type StoredPasskey } from '$lib/smartAccount/storage';
 import { hexToBytes, type Hex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { getPasskeySmartClient } from '$lib/SmartAccount/smartAccount';
+import { getPasskeySmartClient } from '$lib/smartAccount/smartAccount';
 
 let isAuthenticated = $state(false);
 let currentPasskeyAddress = $state<string | null>(null);

@@ -1,32 +1,27 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import * as Card from "$lib/components/ui/card";
-  import { Button } from "$lib/components/ui/button";
-  import { CreditCard, Loader2 } from "lucide-svelte";
-  import { cn } from "$lib/utils";
-  import {
-    createPublicClient,
-    http,
-    parseEther,
-    type LocalAccount,
-  } from "viem";
-  import { base, baseSepolia } from "viem/chains";
-  import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
-  import { retrieveHaloAccount } from "$lib/SmartAccount/haloAccount";
-  import { getSmartClient } from "$lib/SmartAccount/smartAccount";
-  import { transferToken } from "$lib/SmartAccount/smartTransfer";
-  import { tokenAddress } from "../../generated";
-  import AmountKeypad from "./AmountKeypad.svelte";
-  import TransactionLink from "./TransactionLink.svelte";
+  import { onMount } from 'svelte';
+  import * as Card from '$lib/components/ui/card';
+  import { Button } from '$lib/components/ui/button';
+  import { CreditCard, Loader2 } from 'lucide-svelte';
+  import { cn } from '$lib/utils';
+  import { createPublicClient, http, parseEther, type LocalAccount } from 'viem';
+  import { base, baseSepolia } from 'viem/chains';
+  import type { StatusCallbackDetails } from '@arx-research/libhalo/types';
+  import { retrieveHaloAccount } from '$lib/smartAccount/haloAccount';
+  import { getSmartClient } from '$lib/smartAccount/smartAccount';
+  import { transferToken } from '$lib/smartAccount/smartTransfer';
+  import { tokenAddress } from '../../generated';
+  import AmountKeypad from './AmountKeypad.svelte';
+  import TransactionLink from './TransactionLink.svelte';
 
   // Constants
-  let amount = $state("0");
+  let amount = $state('0');
   // Add loading state
   let isLoading = $state(false);
-  let status = $state("");
-  let txLink = $state("");
-  const recipientAddress = "0x88827a6d3693F33Bb4Ab61adc5a880Baa4B333bD";
-  const baseRpcUrl = "https://sepolia.base.org";
+  let status = $state('');
+  let txLink = $state('');
+  const recipientAddress = '0x88827a6d3693F33Bb4Ab61adc5a880Baa4B333bD';
+  const baseRpcUrl = 'https://sepolia.base.org';
 
   // Create Viem client
   const publicClient = createPublicClient({
@@ -58,23 +53,23 @@
         smartAccount,
         tokenAddress[84532] as `0x${string}`,
         recipientAddress,
-        parseEther(amount)
+        parseEther(amount),
       );
 
       if (!transactionHash) {
-        throw new Error("Transaction hash is undefined");
+        throw new Error('Transaction hash is undefined');
       }
 
-      showStatus("Confirming on blockchain...");
+      showStatus('Confirming on blockchain...');
       await publicClient.waitForTransactionReceipt({ hash: transactionHash });
-      showStatus("Payment Successful!");
+      showStatus('Payment Successful!');
       showLink(transactionHash);
     } catch (error) {
-      console.error("Payment failed:", error);
+      console.error('Payment failed:', error);
       if (error instanceof Error) {
         showStatus(`Payment Failed: ${error.message}`);
       } else {
-        showStatus("Payment Failed: Unknown error");
+        showStatus('Payment Failed: Unknown error');
       }
     } finally {
       isLoading = false;
@@ -98,11 +93,7 @@
       <CreditCard class="w-12 h-12 text-primary" />
     </div>
 
-    <Button
-      class="w-full"
-      disabled={isLoading || !amount || amount === "0"}
-      on:click={handlePayment}
-    >
+    <Button class="w-full" disabled={isLoading || !amount || amount === '0'} on:click={handlePayment}>
       {#if isLoading}
         <Loader2 class="mr-2 h-4 w-4 animate-spin" />
       {/if}
@@ -113,12 +104,9 @@
       <div class="w-full max-h-24 overflow-y-auto">
         <p
           class={cn(
-            "text-sm text-center break-words whitespace-pre-wrap",
-            status.toLowerCase().includes("failed")
-              ? "text-destructive"
-              : "text-muted-foreground"
-          )}
-        >
+            'text-sm text-center break-words whitespace-pre-wrap',
+            status.toLowerCase().includes('failed') ? 'text-destructive' : 'text-muted-foreground',
+          )}>
           {status}
         </p>
       </div>

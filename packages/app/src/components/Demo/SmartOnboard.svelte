@@ -1,45 +1,33 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import * as Card from "$lib/components/ui/card";
-  import { Button } from "$lib/components/ui/button";
-  import { CreditCard, Loader2, Wallet, ExternalLink } from "lucide-svelte";
-  import { cn } from "$lib/utils";
-  import {
-    createPublicClient,
-    http,
-    type Address,
-    formatEther,
-    type LocalAccount,
-  } from "viem";
-  import { base, baseSepolia } from "viem/chains";
-  import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
-  import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
-  import { tokenAddress } from "../../generated";
-  import {
-    retrieveHaloAccount,
-    retrieveHaloAddress,
-  } from "$lib/SmartAccount/haloAccount";
-  import { smartDemo } from "$lib/SmartAccount/smartAccount";
-  import {
-    getHaloAddress,
-    getSmartAccountAddress,
-  } from "$stores/account.svelte";
-  import { getStatus, getTransactionLink } from "$stores/status.svelte";
+  import { onMount } from 'svelte';
+  import * as Card from '$lib/components/ui/card';
+  import { Button } from '$lib/components/ui/button';
+  import { CreditCard, Loader2, Wallet, ExternalLink } from 'lucide-svelte';
+  import { cn } from '$lib/utils';
+  import { createPublicClient, http, type Address, formatEther, type LocalAccount } from 'viem';
+  import { base, baseSepolia } from 'viem/chains';
+  import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
+  import type { StatusCallbackDetails } from '@arx-research/libhalo/types';
+  import { tokenAddress } from '../../generated';
+  import { retrieveHaloAccount, retrieveHaloAddress } from '$lib/smartAccount/haloAccount';
+  import { smartDemo } from '$lib/smartAccount/smartAccount';
+  import { getHaloAddress, getSmartAccountAddress } from '$stores/account.svelte';
+  import { getStatus, getTransactionLink } from '$stores/status.svelte';
 
   // Reactive variables
-  let statusMessage = "";
+  let statusMessage = '';
 
-  let haloEthBalance = "0";
-  let haloCoinBalance = "0";
-  let smartEthBalance = "0";
-  let smartCoinBalance = "0";
-  let introText = "Welcome to ZuPay";
+  let haloEthBalance = '0';
+  let haloCoinBalance = '0';
+  let smartEthBalance = '0';
+  let smartCoinBalance = '0';
+  let introText = 'Welcome to ZuPay';
   let showNfcIcon = false;
   let showBalanceInfo = false;
   let showStartButton = true;
   let isLoading = false;
-  let linkHref = "";
-  let linkText = "";
+  let linkHref = '';
+  let linkText = '';
 
   function showStatus(message: string) {
     statusMessage = message;
@@ -48,16 +36,16 @@
 
   function showLink(txHash: string) {
     linkHref = `https://sepolia.basescan.org/tx/${txHash}`;
-    linkText = "View transaction";
+    linkText = 'View transaction';
   }
 
   function updateStatus(status: string, execMethod: StatusCallbackDetails) {
     console.info(status, execMethod);
     const messages: { [key: string]: string } = {
-      init: " ",
-      again: "Processing (1/1).",
-      retry: "Processing (1/1)..",
-      finished: "Processing (1/1)...",
+      init: ' ',
+      again: 'Processing (1/1).',
+      retry: 'Processing (1/1)..',
+      finished: 'Processing (1/1)...',
     };
 
     showStatus(messages[status] || `${status}, ${execMethod}`);
@@ -67,20 +55,18 @@
     isLoading = true;
     try {
       const wallet = (await retrieveHaloAccount()) as LocalAccount;
-      console.log("🚀 | startOnboarding | wallet:", wallet);
+      console.log('🚀 | startOnboarding | wallet:', wallet);
 
-      showStatus("Creating smart account...");
+      showStatus('Creating smart account...');
 
       await smartDemo(wallet);
 
-      showStatus("Smart account created successfully!");
+      showStatus('Smart account created successfully!');
 
       await displayBalance(wallet.address);
     } catch (error) {
-      console.error("Onboarding failed:", error);
-      showStatus(
-        `Onboarding Failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+      console.error('Onboarding failed:', error);
+      showStatus(`Onboarding Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       isLoading = false;
     }
@@ -90,7 +76,7 @@
     try {
       const client = createPublicClient({
         chain: baseSepolia,
-        transport: http("https://sepolia.base.org"),
+        transport: http('https://sepolia.base.org'),
       });
 
       // Get ETH balances
@@ -106,11 +92,11 @@
       const coinContractAddress = tokenAddress[84532];
       const coinAbi = [
         {
-          name: "balanceOf",
-          type: "function",
-          inputs: [{ name: "account", type: "address" }],
-          outputs: [{ name: "", type: "uint256" }],
-          stateMutability: "view",
+          name: 'balanceOf',
+          type: 'function',
+          inputs: [{ name: 'account', type: 'address' }],
+          outputs: [{ name: '', type: 'uint256' }],
+          stateMutability: 'view',
         },
       ];
 
@@ -118,13 +104,13 @@
         client.readContract({
           address: coinContractAddress,
           abi: coinAbi,
-          functionName: "balanceOf",
+          functionName: 'balanceOf',
           args: [haloAddress],
         }),
         client.readContract({
           address: coinContractAddress,
           abi: coinAbi,
-          functionName: "balanceOf",
+          functionName: 'balanceOf',
           args: [getSmartAccountAddress()],
         }),
       ]);
@@ -132,18 +118,18 @@
       haloCoinBalance = formatEther(haloCoinBalanceWei as bigint);
       smartCoinBalance = formatEther(smartCoinBalanceWei as bigint);
 
-      introText = "Welcome Back,";
+      introText = 'Welcome Back,';
       showNfcIcon = false;
       showBalanceInfo = true;
     } catch (error) {
-      console.error("Failed to fetch balance:", error);
-      showStatus("Failed to fetch balance");
+      console.error('Failed to fetch balance:', error);
+      showStatus('Failed to fetch balance');
     }
   }
 
   function handleBeginRequest() {
     showStartButton = false;
-    introText = "Tap your NFC Wristband to continue!";
+    introText = 'Tap your NFC Wristband to continue!';
     setTimeout(() => {
       showNfcIcon = true;
       startOnboarding();
@@ -151,7 +137,7 @@
   }
 
   function truncateAddress(address: string | null | undefined) {
-    if (!address) return "";
+    if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
 
@@ -174,8 +160,7 @@
               href={getExplorerUrl(getHaloAddress())}
               target="_blank"
               rel="noopener noreferrer"
-              class="hover:text-primary transition-colors"
-            >
+              class="hover:text-primary transition-colors">
               {truncateAddress(getHaloAddress())}
             </a>
           </span>
@@ -185,8 +170,7 @@
               href={getExplorerUrl(getSmartAccountAddress())}
               target="_blank"
               rel="noopener noreferrer"
-              class="hover:text-primary transition-colors"
-            >
+              class="hover:text-primary transition-colors">
               {truncateAddress(getSmartAccountAddress())}
             </a>
           </span>
@@ -210,29 +194,18 @@
             href={getExplorerUrl(getHaloAddress())}
             target="_blank"
             rel="noopener noreferrer"
-            class="group inline-flex items-center gap-1 hover:text-primary transition-colors"
-          >
-            <h3
-              class="text-sm font-medium text-muted-foreground group-hover:text-primary"
-            >
-              Halo Wallet
-            </h3>
-            <ExternalLink
-              class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"
-            />
+            class="group inline-flex items-center gap-1 hover:text-primary transition-colors">
+            <h3 class="text-sm font-medium text-muted-foreground group-hover:text-primary">Halo Wallet</h3>
+            <ExternalLink class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
+          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
             <div class="flex items-center gap-2">
               <Wallet class="w-5 h-5" />
               <span>ETH Balance</span>
             </div>
             <span class="font-mono">{haloEthBalance}</span>
           </div>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
+          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
             <div class="flex items-center gap-2">
               <Wallet class="w-5 h-5" />
               <span>COIN Balance</span>
@@ -247,29 +220,18 @@
             href={getExplorerUrl(getSmartAccountAddress())}
             target="_blank"
             rel="noopener noreferrer"
-            class="group inline-flex items-center gap-1 hover:text-primary transition-colors"
-          >
-            <h3
-              class="text-sm font-medium text-muted-foreground group-hover:text-primary"
-            >
-              Smart Account
-            </h3>
-            <ExternalLink
-              class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"
-            />
+            class="group inline-flex items-center gap-1 hover:text-primary transition-colors">
+            <h3 class="text-sm font-medium text-muted-foreground group-hover:text-primary">Smart Account</h3>
+            <ExternalLink class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
+          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
             <div class="flex items-center gap-2">
               <Wallet class="w-5 h-5" />
               <span>ETH Balance</span>
             </div>
             <span class="font-mono">{smartEthBalance}</span>
           </div>
-          <div
-            class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-          >
+          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
             <div class="flex items-center gap-2">
               <Wallet class="w-5 h-5" />
               <span>COIN Balance</span>
@@ -293,12 +255,9 @@
       <div class="w-full max-h-24 overflow-y-auto">
         <p
           class={cn(
-            "text-sm text-center break-words whitespace-pre-wrap",
-            getStatus().toLowerCase().includes("failed")
-              ? "text-destructive"
-              : "text-muted-foreground"
-          )}
-        >
+            'text-sm text-center break-words whitespace-pre-wrap',
+            getStatus().toLowerCase().includes('failed') ? 'text-destructive' : 'text-muted-foreground',
+          )}>
           {getStatus()}
         </p>
       </div>
@@ -310,8 +269,7 @@
           href={getTransactionLink()}
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-1.5 hover:text-primary transition-colors"
-        >
+          class="flex items-center gap-1.5 hover:text-primary transition-colors">
           See Transaction
           <ExternalLink class="w-3 h-3" />
         </a>

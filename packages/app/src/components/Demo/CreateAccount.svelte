@@ -1,23 +1,15 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button";
-  import { Wallet, ExternalLink, Key, LogOut, LogIn } from "lucide-svelte";
+  import { Button } from '$lib/components/ui/button';
+  import { Wallet, ExternalLink, Key, LogOut, LogIn } from 'lucide-svelte';
   import {
     getSmartAccount,
     getSmartAccountAddress,
     setSmartAccount,
     setSmartAccountAddress,
-  } from "$stores/account.svelte";
-  import {
-    getPasskeySmartClient,
-    signMessageWithSmartPasskeyClient,
-  } from "$lib/SmartAccount/smartAccount";
-  import {
-    signup,
-    logout,
-    login,
-    getIsAuthenticated,
-  } from "$stores/auth.svelte";
-  import { hasStoredPasskey } from "$lib/SmartAccount/storage";
+  } from '$stores/account.svelte';
+  import { getPasskeySmartClient, signMessageWithSmartPasskeyClient } from '$lib/smartAccount/smartAccount';
+  import { signup, logout, login, getIsAuthenticated } from '$stores/auth.svelte';
+  import { hasStoredPasskey } from '$lib/smartAccount/storage';
 
   let isLoading = $state(false);
   let error = $state<string | null>(null);
@@ -35,11 +27,11 @@
     try {
       isLoading = true;
       error = null;
-      await signup("Zupay 1");
+      await signup('Zupay 1');
       await handleCreateSmartAccount();
     } catch (err) {
-      console.error("Failed to create passkey:", err);
-      error = "Failed to create passkey. Please try again.";
+      console.error('Failed to create passkey:', err);
+      error = 'Failed to create passkey. Please try again.';
     } finally {
       isLoading = false;
     }
@@ -52,8 +44,8 @@
       await login();
       await handleCreateSmartAccount();
     } catch (err) {
-      console.error("Login failed:", err);
-      error = "Login failed. Please try again.";
+      console.error('Login failed:', err);
+      error = 'Login failed. Please try again.';
     } finally {
       isLoading = false;
     }
@@ -71,8 +63,8 @@
         setSmartAccountAddress(smartAccount.account.address);
       }
     } catch (err) {
-      console.error("Failed to create smart account:", err);
-      error = "Failed to create smart account. Please try again.";
+      console.error('Failed to create smart account:', err);
+      error = 'Failed to create smart account. Please try again.';
     } finally {
       isLoading = false;
     }
@@ -85,7 +77,7 @@
   }
 
   function openEtherscan(address: `0x${string}`) {
-    window.open(`https://sepolia.basescan.org/address/${address}`, "_blank");
+    window.open(`https://sepolia.basescan.org/address/${address}`, '_blank');
   }
 
   async function handleSignMessage() {
@@ -95,8 +87,8 @@
       const signature = await signMessageWithSmartPasskeyClient();
       signedMessage = signature;
     } catch (err) {
-      console.error("Failed to sign message:", err);
-      error = "Failed to sign message. Please try again.";
+      console.error('Failed to sign message:', err);
+      error = 'Failed to sign message. Please try again.';
     } finally {
       isLoading = false;
     }
@@ -114,18 +106,12 @@
     <div class="space-y-4">
       <div class="text-center">
         <h2 class="text-lg font-semibold">Create or Login with Passkey</h2>
-        <p class="text-sm text-muted-foreground">
-          Create a new passkey or login with an existing one
-        </p>
+        <p class="text-sm text-muted-foreground">Create a new passkey or login with an existing one</p>
       </div>
 
-      <Button
-        on:click={handleCreatePasskey}
-        class="w-full"
-        disabled={isLoading}
-      >
+      <Button on:click={handleCreatePasskey} class="w-full" disabled={isLoading}>
         <Key class="mr-2 h-4 w-4" />
-        {isLoading ? "Creating Passkey..." : "Create New Passkey"}
+        {isLoading ? 'Creating Passkey...' : 'Create New Passkey'}
       </Button>
 
       {#if storedPasskey}
@@ -138,14 +124,9 @@
           </div>
         </div>
 
-        <Button
-          on:click={handleLogin}
-          variant="outline"
-          class="w-full"
-          disabled={isLoading}
-        >
+        <Button on:click={handleLogin} variant="outline" class="w-full" disabled={isLoading}>
           <LogIn class="mr-2 h-4 w-4" />
-          {isLoading ? "Logging in..." : "Login with Existing Passkey"}
+          {isLoading ? 'Logging in...' : 'Login with Existing Passkey'}
         </Button>
       {/if}
     </div>
@@ -161,11 +142,7 @@
       <div class="flex gap-2 flex-col">
         <div class="flex gap-2">
           {#if smartAccountAddress}
-            <Button
-              variant="outline"
-              class="flex-1"
-              on:click={() => openEtherscan(smartAccountAddress)}
-            >
+            <Button variant="outline" class="flex-1" on:click={() => openEtherscan(smartAccountAddress)}>
               <ExternalLink class="mr-2 h-4 w-4" />
               View on Explorer
             </Button>
@@ -177,14 +154,9 @@
           </Button>
         </div>
 
-        <Button
-          variant="secondary"
-          class="w-full"
-          on:click={handleSignMessage}
-          disabled={isLoading}
-        >
+        <Button variant="secondary" class="w-full" on:click={handleSignMessage} disabled={isLoading}>
           <Key class="mr-2 h-4 w-4" />
-          {isLoading ? "Signing..." : "Sign Message"}
+          {isLoading ? 'Signing...' : 'Sign Message'}
         </Button>
 
         {#if signedMessage}
