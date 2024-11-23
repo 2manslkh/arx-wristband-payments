@@ -5,30 +5,31 @@ import { createPublicClient, getContract, http, parseEther, type Address, type E
 import { baseSepolia } from 'viem/chains';
 import { PUBLIC_PIMLICO_API_KEY } from '$env/static/public';
 
-
-import { entryPoint07Address, toCoinbaseSmartAccount } from 'viem/account-abstraction';
+import { entryPoint07Address, toCoinbaseSmartAccount, toWebAuthnAccount } from 'viem/account-abstraction';
 import { tokenAbi, tokenAddress } from '../../generated';
-import { setPasskeyOwner, setPasskeyOwnerAddress, setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
+import { getSmartAccount, setPasskeyOwner, setPasskeyOwnerAddress, setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
 import { setStatus, setTransactionLink } from '$stores/status.svelte';
-import { getOwnerFromPasskey } from './owner';
 import { getAddressFromPublicKey } from '$lib/util/getAddressFromPublicKey';
 import { publicClient, paymasterClient } from './pimlico';
+import { getCredential } from "$stores/auth.svelte";
 
 export async function getPasskeySmartClient() {
 
+	const credential = getCredential();
+	const signer = toWebAuthnAccount({ credential: { id: credential.id, publicKey: credential.publicKeyHex } })
+	console.log("🚀 | getPasskeySmartClient | signer:", signer)
 
-	const owner = await getOwnerFromPasskey();
+	setPasskeyOwner(signer);
+	setPasskeyOwnerAddress(getAddressFromPublicKey(signer.publicKey));
 
-	setPasskeyOwner(owner);
-	setPasskeyOwnerAddress(getAddressFromPublicKey(owner.publicKey));
-
-	const coinbaseAccount = await toCoinbaseSmartAccount({
+	const smartAccount = await toCoinbaseSmartAccount({
 		client: publicClient,
-		owners: [owner],
+		owners: [signer],
 	})
+	console.log("🚀 | getPasskeySmartClient | smartAccount:", smartAccount)
 
 	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
-		account: coinbaseAccount,
+		account: smartAccount,
 		chain: baseSepolia,
 		paymaster: paymasterClient,
 		bundlerTransport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`),
@@ -36,9 +37,31 @@ export async function getPasskeySmartClient() {
 			estimateFeesPerGas: async () => (await paymasterClient.getUserOperationGasPrice()).fast
 		}
 	});
+	console.log("🚀 | getPasskeySmartClient | smartAccountClient:", smartAccountClient)
 
 	setSmartAccount(smartAccountClient);
 	return smartAccountClient;
+}
+
+export async function signMessageWithSmartPasskeyClient() {
+	const smartAccountClient = getSmartAccount();
+
+	if (!smartAccountClient) {
+		throw new Error('Smart account client is undefined');
+	}
+
+	// We can ignore the account parameter because we know it's a smart account
+	return smartAccountClient.signMessage({ message: "Hello, world!" });
+}
+
+export async function addOwnerToSmartAccount(newOwnerAddress: Address) {
+	const smartAccountClient = getSmartAccount();
+
+	if (!smartAccountClient) {
+		throw new Error('Smart account client is undefined');
+	}
+
+
 }
 
 

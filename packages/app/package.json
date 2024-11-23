@@ -51,6 +51,7 @@
     "eslint-plugin-svelte": "^2.46.0",
     "lucide-svelte": "^0.460.1",
     "magic-sdk": "^28.18.0",
+    "ox": "^0.2.2",
     "patch-package": "^8.0.0",
     "permissionless": "^0.2.18",
     "postcss": "^8.4.49",

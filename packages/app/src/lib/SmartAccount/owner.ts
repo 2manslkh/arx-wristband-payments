@@ -3,10 +3,10 @@ import { createWebAuthnCredential, toWebAuthnAccount, type WebAuthnAccount } fro
 export async function getOwnerFromPasskey(): Promise<WebAuthnAccount> {
     // Register a credential (ie. passkey).
     const credential = await createWebAuthnCredential({
-        name: 'Wallet',
+        name: 'zupay.id',
 
     })
 
     // Create a WebAuthn owner account from the credential.
-    return toWebAuthnAccount({ credential, })
+    return toWebAuthnAccount({ credential })
 }
