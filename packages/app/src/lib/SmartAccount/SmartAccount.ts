@@ -10,7 +10,7 @@ import { tokenAbi, tokenAddress } from '../../generated';
 import { getSmartAccount, setPasskeyOwner, setPasskeyOwnerAddress, setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
 import { setStatus, setTransactionLink } from '$stores/status.svelte';
 import { getAddressFromPublicKey } from '$lib/util/getAddressFromPublicKey';
-import { publicClient, paymasterClient } from './pimlico';
+import { publicClient, paymasterClient } from '$lib/smartAccount/pimlico';
 import { getCredential } from "$stores/auth.svelte";
 
 export async function getPasskeySmartClient() {
