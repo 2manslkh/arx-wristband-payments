@@ -5,14 +5,14 @@
   import { CreditCard, Loader2, Wallet, ExternalLink } from 'lucide-svelte';
   import { cn } from '$lib/utils';
   import { createPublicClient, http, type Address, formatEther, type LocalAccount } from 'viem';
-  import { base, baseSepolia } from 'viem/chains';
-  import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
+  import { baseSepolia } from 'viem/chains';
   import type { StatusCallbackDetails } from '@arx-research/libhalo/types';
   import { tokenAddress } from '../../generated';
-  import { retrieveHaloAccount, retrieveHaloAddress } from '$lib/smartAccount/haloAccount';
+  import { retrieveHaloAccount } from '$lib/smartAccount/haloAccount';
   import { smartDemo } from '$lib/smartAccount/smartAccount';
   import { getHaloAddress, getSmartAccountAddress } from '$stores/account.svelte';
   import { getStatus, getTransactionLink } from '$stores/status.svelte';
+  import { UserAddresses, UserBalance } from '$components/User';
 
   // Reactive variables
   let statusMessage = '';
@@ -141,10 +141,6 @@
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
 
-  function getExplorerUrl(address: string) {
-    return `https://sepolia.basescan.org/address/${address}`;
-  }
-
   onMount(() => {});
 </script>
 
@@ -153,28 +149,7 @@
     <Card.Title class="text-2xl text-center">{introText}</Card.Title>
     {#if getHaloAddress()}
       <Card.Description class="text-center text-lg font-mono">
-        <div class="flex flex-col gap-1">
-          <span>
-            Halo:
-            <a
-              href={getExplorerUrl(getHaloAddress())}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="hover:text-primary transition-colors">
-              {truncateAddress(getHaloAddress())}
-            </a>
-          </span>
-          <span>
-            Smart:
-            <a
-              href={getExplorerUrl(getSmartAccountAddress())}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="hover:text-primary transition-colors">
-              {truncateAddress(getSmartAccountAddress())}
-            </a>
-          </span>
-        </div>
+        <UserAddresses />
       </Card.Description>
     {/if}
   </Card.Header>
@@ -187,59 +162,7 @@
     {/if}
 
     {#if showBalanceInfo}
-      <div class="w-full space-y-6">
-        <!-- Halo Wallet Balances -->
-        <div class="space-y-2">
-          <a
-            href={getExplorerUrl(getHaloAddress())}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group inline-flex items-center gap-1 hover:text-primary transition-colors">
-            <h3 class="text-sm font-medium text-muted-foreground group-hover:text-primary">Halo Wallet</h3>
-            <ExternalLink class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </a>
-          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>ETH Balance</span>
-            </div>
-            <span class="font-mono">{haloEthBalance}</span>
-          </div>
-          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>COIN Balance</span>
-            </div>
-            <span class="font-mono">{haloCoinBalance}</span>
-          </div>
-        </div>
-
-        <!-- Smart Account Balances -->
-        <div class="space-y-2">
-          <a
-            href={getExplorerUrl(getSmartAccountAddress())}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group inline-flex items-center gap-1 hover:text-primary transition-colors">
-            <h3 class="text-sm font-medium text-muted-foreground group-hover:text-primary">Smart Account</h3>
-            <ExternalLink class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </a>
-          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>ETH Balance</span>
-            </div>
-            <span class="font-mono">{smartEthBalance}</span>
-          </div>
-          <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
-            <div class="flex items-center gap-2">
-              <Wallet class="w-5 h-5" />
-              <span>COIN Balance</span>
-            </div>
-            <span class="font-mono">{smartCoinBalance}</span>
-          </div>
-        </div>
-      </div>
+      <UserBalance {haloEthBalance} {haloCoinBalance} {smartEthBalance} {smartCoinBalance} />
     {/if}
 
     {#if showStartButton}

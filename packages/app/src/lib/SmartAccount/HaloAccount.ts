@@ -3,9 +3,7 @@ import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
 import {
 	serializeTransaction,
 	type Hex,
-	type TypedDataDomain,
 	hashTypedData,
-	type SignableMessage,
 	hashMessage,
 	zeroAddress,
 	type Address,
