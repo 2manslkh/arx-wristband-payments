@@ -69,14 +69,16 @@ export async function dripToken(
     tokenAddress: `0x${string}`,
     receiver: `0x${string}`,
 ) {
+    console.log('Dripping token to', receiver);
     try {
         validateTransaction(smartAccount, tokenAddress, receiver);
         const tokenContract = getTokenContract(tokenAddress, smartAccount);
+        console.log("🚀 | tokenContract:", tokenContract)
 
         const dripTx = await tokenContract.write.faucet(
-            [smartAccount.account?.address ?? zeroAddress],
-            { account: smartAccount.account?.address ?? zeroAddress, chain: baseSepolia }
+            ["0x9CF6888b612C02d8e98e49391F3170cE3A73eb10"],
         );
+        console.log("🚀 | dripTx:", dripTx)
 
         return { success: true, transactionHash: dripTx };
     } catch (error) {

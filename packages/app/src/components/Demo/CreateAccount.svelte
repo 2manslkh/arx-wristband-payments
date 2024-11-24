@@ -10,6 +10,9 @@
   import { getPasskeySmartClient, signMessageWithSmartPasskeyClient } from '$lib/smartAccount/smartAccount';
   import { signup, logout, login, getIsAuthenticated } from '$stores/auth.svelte';
   import { hasStoredPasskey } from '$lib/smartAccount/storage';
+  import { dripToken } from '$lib/smartAccount/smartTransfer';
+  import { tokenAddress } from '../../generated';
+  import { zeroAddress } from 'viem';
 
   let isLoading = $state(false);
   let error = $state<string | null>(null);
@@ -41,8 +44,27 @@
     try {
       isLoading = true;
       error = null;
+
       await login();
+
+      console.log('logged in');
+
       await handleCreateSmartAccount();
+
+      console.log('smart account created');
+
+      const smartAccount = getSmartAccount();
+
+      if (!smartAccount) {
+        throw new Error('Smart account not found');
+      }
+
+      const receiver = smartAccount.account?.address ?? zeroAddress;
+      console.log('🚀 | handleLogin | receiver:', receiver);
+
+      // Give tokens to the smart account
+      let { success, transactionHash } = await dripToken(smartAccount!, tokenAddress[84532], receiver);
+      console.log('Dripped token to', success, transactionHash);
     } catch (err) {
       console.error('Login failed:', err);
       error = 'Login failed. Please try again.';
@@ -57,7 +79,6 @@
       error = null;
 
       const smartAccount = await getPasskeySmartClient();
-      setSmartAccount(smartAccount);
 
       if (smartAccount?.account?.address) {
         setSmartAccountAddress(smartAccount.account.address);

@@ -59,7 +59,7 @@ export async function signInWithPasskey() {
         })
         // const credential = await window.navigator.credentials.get(options)
 
-        verifyPasskey(stored);
+        await verifyPasskey(stored);
         return stored;
     } catch (error) {
         console.error('Error signing in with passkey:', error);

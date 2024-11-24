@@ -13,6 +13,7 @@ import { getAddressFromPublicKey } from '$lib/util/getAddressFromPublicKey';
 import { publicClient, paymasterClient } from '$lib/smartAccount/pimlico';
 import { getCredential } from "$stores/auth.svelte";
 
+
 export async function getPasskeySmartClient() {
 
 	const credential = getCredential();
@@ -22,10 +23,20 @@ export async function getPasskeySmartClient() {
 	setPasskeyOwner(signer);
 	setPasskeyOwnerAddress(getAddressFromPublicKey(signer.publicKey));
 
-	const smartAccount = await toCoinbaseSmartAccount({
+	// const smartAccount = await toCoinbaseSmartAccount({
+	// 	client: publicClient,
+	// 	owners: [signer],
+	// })
+
+	const smartAccount = await toSafeSmartAccount({
 		client: publicClient,
-		owners: [signer],
-	})
+		entryPoint: {
+			address: entryPoint07Address,
+			version: "0.7"
+		},
+		owners: [signer], // Changed to provide address directly
+		version: "1.4.1"
+	});
 	console.log("🚀 | getPasskeySmartClient | smartAccount:", smartAccount)
 
 	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
@@ -67,7 +78,7 @@ export async function addOwnerToSmartAccount(newOwnerAddress: Address) {
 
 export async function getSmartClient(signer: LocalAccount) {
 
-	const safeAccount = await toSafeSmartAccount({
+	const smartAccount = await toSafeSmartAccount({
 		client: publicClient,
 		entryPoint: {
 			address: entryPoint07Address,
@@ -77,8 +88,13 @@ export async function getSmartClient(signer: LocalAccount) {
 		version: "1.4.1"
 	});
 
+	// const smartAccount = await toCoinbaseSmartAccount({
+	// 	client: publicClient,
+	// 	owners: [signer],
+	// })
+
 	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
-		account: safeAccount,
+		account: smartAccount,
 		chain: baseSepolia,
 		paymaster: paymasterClient,
 		bundlerTransport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`),
@@ -86,6 +102,8 @@ export async function getSmartClient(signer: LocalAccount) {
 			estimateFeesPerGas: async () => (await paymasterClient.getUserOperationGasPrice()).fast
 		}
 	});
+
+
 
 	setSmartAccount(smartAccountClient);
 	if (smartAccountClient.account) {

@@ -27,7 +27,7 @@ function defaultHaloCallback(status: string, execMethod: StatusCallbackDetails) 
 
 export async function retrieveHaloAddress() {
     if (getHaloAddress() === zeroAddress) {
-        const nfcResult = await execHaloCmdWeb({ name: 'get_pkeys' }, { method: 'webnfc', statusCallback: defaultHaloCallback });
+        const nfcResult = await execHaloCmdWeb({ name: 'get_pkeys' }, { statusCallback: defaultHaloCallback });
         setHaloAddress(nfcResult.etherAddresses['1'] as `0x${string}`);
     }
     return getHaloAddress();
@@ -40,7 +40,7 @@ async function signDigest(digest: BytesLike): Promise<string> {
             keyNo: 1,
             digest: hexlify(digest).substring(2)
         },
-        { method: 'webnfc', statusCallback: defaultHaloCallback }
+        { statusCallback: defaultHaloCallback }
     );
 
     return res.signature.ether;
@@ -68,13 +68,12 @@ export async function retrieveHaloAccount() {
             async signTypedData(typedData) {
                 const { domain, types, message, primaryType } = typedData;
 
-                const { EIP712Domain: _, ...filteredTypes } = types;
 
                 const hash = hashTypedData({
                     domain,
-                    types: filteredTypes,
-                    primaryType: primaryType,
-                    message
+                    types: types,
+                    message,
+                    primaryType
                 });
 
                 const signature = await signDigest(hash);
