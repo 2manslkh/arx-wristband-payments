@@ -1,35 +1,24 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import * as Card from "$lib/components/ui/card";
-  import { Button } from "$lib/components/ui/button";
-  import { CreditCard, Loader2, Wallet } from "lucide-svelte";
-  import { cn } from "$lib/utils";
-  import {
-    createPublicClient,
-    http,
-    parseEther,
-    serializeTransaction,
-    keccak256,
-    createWalletClient,
-    type TransactionSerializable,
-    type Signature,
-    type Address,
-    formatEther,
-  } from "viem";
-  import { base, baseSepolia } from "viem/chains";
-  import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
-  import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
-  import { tokenAddress } from "../../generated";
+  import { onMount } from 'svelte';
+  import * as Card from '$lib/components/ui/card';
+  import { Button } from '$lib/components/ui/button';
+  import { CreditCard, Loader2, Wallet } from 'lucide-svelte';
+  import { cn } from '$lib/utils';
+  import { createPublicClient, http, type Address, formatEther } from 'viem';
+  import { base, baseSepolia } from 'viem/chains';
+  import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
+  import type { StatusCallbackDetails } from '@arx-research/libhalo/types';
+  import { tokenAddress } from '../../generated';
 
   // Reactive variables
-  let statusMessage = "";
-  let linkHref = "";
-  let linkText = "";
-  let ethBalance = "0";
-  let coinBalance = "0";
-  let introText = "Welcome to ZuPay";
+  let statusMessage = '';
+  let linkHref = '';
+  let linkText = '';
+  let ethBalance = '0';
+  let coinBalance = '0';
+  let introText = 'Welcome to ZuPay';
   let showNfcIcon = false;
-  let ethAddress = "";
+  let ethAddress = '';
   let showBalanceInfo = false;
   let showStartButton = true;
   let isLoading = false;
@@ -41,16 +30,16 @@
 
   function showLink(txHash: string) {
     linkHref = `https://sepolia.basescan.org/tx/${txHash}`;
-    linkText = "View transaction";
+    linkText = 'View transaction';
   }
 
   function updateStatus(status: string, execMethod: StatusCallbackDetails) {
     console.info(status, execMethod);
     const messages: { [key: string]: string } = {
-      init: " ",
-      again: "Processing (1/1).",
-      retry: "Processing (1/1)..",
-      finished: "Processing (1/1)...",
+      init: ' ',
+      again: 'Processing (1/1).',
+      retry: 'Processing (1/1)..',
+      finished: 'Processing (1/1)...',
     };
 
     showStatus(messages[status] || `${status}, ${execMethod}`);
@@ -59,39 +48,34 @@
   async function startOnboarding() {
     isLoading = true;
     try {
-      showStatus("Processing faucet request...");
+      showStatus('Processing faucet request...');
 
-      const nfcResult = await execHaloCmdWeb(
-        { name: "get_pkeys" },
-        { statusCallback: updateStatus, method: "webnfc" }
-      );
+      const nfcResult = await execHaloCmdWeb({ name: 'get_pkeys' }, { statusCallback: updateStatus, method: 'webnfc' });
 
-      const recipientAddress = nfcResult.etherAddresses["1"];
+      const recipientAddress = nfcResult.etherAddresses['1'];
 
-      showStatus("Onboarding...");
+      showStatus('Onboarding...');
 
-      const response = await fetch("/api/faucet", {
-        method: "POST",
+      const response = await fetch('/api/faucet', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ receiver: recipientAddress }),
       });
 
       if (!response.ok) {
-        throw new Error("Faucet request failed");
+        throw new Error('Faucet request failed');
       }
       const { txHash } = await response.json();
 
-      showStatus("Onboarded successfully!");
+      showStatus('Onboarded successfully!');
       showLink(txHash);
 
       await displayBalance(recipientAddress);
     } catch (error) {
-      console.error("Onboarding failed:", error);
-      showStatus(
-        `Onboarding Failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+      console.error('Onboarding failed:', error);
+      showStatus(`Onboarding Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       isLoading = false;
     }
@@ -101,7 +85,7 @@
     try {
       const client = createPublicClient({
         chain: baseSepolia,
-        transport: http("https://sepolia.base.org"),
+        transport: http('https://sepolia.base.org'),
       });
 
       const balance = (await client.getBalance({ address })) as bigint;
@@ -110,34 +94,34 @@
       const coinContractAddress = tokenAddress[84532];
       const coinAbi = [
         {
-          name: "balanceOf",
-          type: "function",
-          inputs: [{ name: "account", type: "address" }],
-          outputs: [{ name: "", type: "uint256" }],
-          stateMutability: "view",
+          name: 'balanceOf',
+          type: 'function',
+          inputs: [{ name: 'account', type: 'address' }],
+          outputs: [{ name: '', type: 'uint256' }],
+          stateMutability: 'view',
         },
       ];
       const coinBalanceWei = (await client.readContract({
         address: coinContractAddress,
         abi: coinAbi,
-        functionName: "balanceOf",
+        functionName: 'balanceOf',
         args: [address],
       })) as bigint;
       coinBalance = formatEther(coinBalanceWei);
 
-      introText = "Welcome Back,";
+      introText = 'Welcome Back,';
       showNfcIcon = false;
       ethAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
       showBalanceInfo = true;
     } catch (error) {
-      console.error("Failed to fetch balance:", error);
-      showStatus("Failed to fetch balance");
+      console.error('Failed to fetch balance:', error);
+      showStatus('Failed to fetch balance');
     }
   }
 
   function handleBeginRequest() {
     showStartButton = false;
-    introText = "Tap your NFC Wristband to continue!";
+    introText = 'Tap your NFC Wristband to continue!';
     setTimeout(() => {
       showNfcIcon = true;
       startOnboarding();
@@ -166,18 +150,14 @@
 
     {#if showBalanceInfo}
       <div class="w-full space-y-4">
-        <div
-          class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-        >
+        <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
           <div class="flex items-center gap-2">
             <Wallet class="w-5 h-5" />
             <span>ETH Balance</span>
           </div>
           <span class="font-mono">{ethBalance}</span>
         </div>
-        <div
-          class="flex items-center justify-between p-4 rounded-lg bg-secondary"
-        >
+        <div class="flex items-center justify-between p-4 rounded-lg bg-secondary">
           <div class="flex items-center gap-2">
             <Wallet class="w-5 h-5" />
             <span>COIN Balance</span>
@@ -200,12 +180,9 @@
       <div class="w-full max-h-24 overflow-y-auto">
         <p
           class={cn(
-            "text-sm text-center break-words whitespace-pre-wrap",
-            statusMessage.toLowerCase().includes("failed")
-              ? "text-destructive"
-              : "text-muted-foreground"
-          )}
-        >
+            'text-sm text-center break-words whitespace-pre-wrap',
+            statusMessage.toLowerCase().includes('failed') ? 'text-destructive' : 'text-muted-foreground',
+          )}>
           {statusMessage}
         </p>
       </div>
