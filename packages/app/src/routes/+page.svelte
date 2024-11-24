@@ -1,12 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount } from 'svelte';
 
-  import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-  } from "$lib/components/ui/tabs";
+  import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
   import {
     createPublicClient,
     http,
@@ -16,20 +11,20 @@
     createWalletClient,
     type TransactionSerializable,
     type Signature,
-  } from "viem";
-  import { base, baseSepolia } from "viem/chains";
-  import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
-  import type { StatusCallbackDetails } from "@arx-research/libhalo/types";
-  import { PayETH, PayToken } from "$components/Demo";
-  import Onboard from "$components/Demo/Onboard.svelte";
-  import SmartOnboard from "$components/Demo/SmartOnboard.svelte";
-  import RegisterENS from "$components/Demo/RegisterENS.svelte";
-  import CreateAccount from "$components/Demo/CreateAccount.svelte";
+  } from 'viem';
+  import { base, baseSepolia } from 'viem/chains';
+  import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
+  import type { StatusCallbackDetails } from '@arx-research/libhalo/types';
+  import { PayETH, PayToken } from '$components/Demo';
+  import Onboard from '$components/Demo/Onboard.svelte';
+  import SmartOnboard from '$components/Demo/SmartOnboard.svelte';
+  import RegisterENS from '$components/Demo/RegisterENS.svelte';
+  import CreateAccount from '$components/Demo/CreateAccount.svelte';
 
   // Constants
-  const amount = "0.00001";
-  const recipientAddress = "0x985A29E88E75394DbDaE41a269409f701ccf6a43";
-  const baseRpcUrl = "https://sepolia.base.org";
+  const amount = '0.00001';
+  const recipientAddress = '0x985A29E88E75394DbDaE41a269409f701ccf6a43';
+  const baseRpcUrl = 'https://sepolia.base.org';
 
   // Create Viem client
   const publicClient = createPublicClient({
@@ -38,8 +33,8 @@
   });
 
   // Reactive variables
-  let status = "";
-  let txLink = "";
+  let status = '';
+  let txLink = '';
 
   // Function to show status
   function showStatus(message: string) {
@@ -56,24 +51,21 @@
   function updateStatus(status: string, execMethod: StatusCallbackDetails) {
     console.info(status, execMethod);
     const messages: { [key: string]: string } = {
-      init: "Please tap your Halo card to the back of your smartphone.",
-      again: "Processing (1/2)..",
-      retry: "There was an error. Please try tapping your card again.",
-      finished: "Processing (1/2)...",
+      init: 'Please tap your Halo card to the back of your smartphone.',
+      again: 'Processing (1/2)..',
+      retry: 'There was an error. Please try tapping your card again.',
+      finished: 'Processing (1/2)...',
     };
     showStatus(messages[status] || `${status}, ${execMethod}`);
   }
 
-  function updateStatusPhase2(
-    status: string,
-    execMethod: StatusCallbackDetails
-  ) {
+  function updateStatusPhase2(status: string, execMethod: StatusCallbackDetails) {
     console.info(status, execMethod);
     const messages: { [key: string]: string } = {
-      init: "Processing (2/2).",
-      again: "Processing (2/2)..",
-      retry: "There was an error. Please try tapping your card again.",
-      finished: "Processing (2/2)...",
+      init: 'Processing (2/2).',
+      again: 'Processing (2/2)..',
+      retry: 'There was an error. Please try tapping your card again.',
+      finished: 'Processing (2/2)...',
     };
     showStatus(messages[status] || `${status}, ${execMethod}`);
   }
@@ -86,17 +78,17 @@
     isLoading = true;
     try {
       const nfcResult = await execHaloCmdWeb(
-        { name: "get_pkeys" },
+        { name: 'get_pkeys' },
 
         {
-          method: "webnfc",
+          method: 'webnfc',
           statusCallback: updateStatus,
-        }
+        },
       );
 
       const [nonce, gasPrice] = await Promise.all([
         publicClient.getTransactionCount({
-          address: nfcResult.etherAddresses["1"],
+          address: nfcResult.etherAddresses['1'],
         }),
         publicClient.getGasPrice(),
       ]);
@@ -114,11 +106,11 @@
       const digest = keccak256(serializedTx).slice(2);
 
       const signedTxResult = await execHaloCmdWeb(
-        { name: "sign", digest, keyNo: 1 },
+        { name: 'sign', digest, keyNo: 1 },
         {
-          method: "webnfc",
+          method: 'webnfc',
           statusCallback: updateStatusPhase2,
-        }
+        },
       );
 
       const signature: Signature = {
@@ -136,12 +128,12 @@
         serializedTransaction: serializeTransaction(transaction, signature),
       });
 
-      showStatus("Confirming on blockchain...");
+      showStatus('Confirming on blockchain...');
       await publicClient.waitForTransactionReceipt({ hash });
-      showStatus("Payment Successful!");
+      showStatus('Payment Successful!');
       showLink(hash);
     } catch (error) {
-      console.error("Payment failed:", error);
+      console.error('Payment failed:', error);
       if (error instanceof Error) {
         showStatus(`Payment Failed: ${error.message}`);
       }
@@ -162,9 +154,7 @@
       <TabsTrigger value="onboard" class="cursor-pointer">Onboard</TabsTrigger>
       <TabsTrigger value="demo" class="cursor-pointer">Demo</TabsTrigger>
       <TabsTrigger value="demo token" class="cursor-pointer">Token</TabsTrigger>
-      <TabsTrigger value="smart account" class="cursor-pointer"
-        >Smart</TabsTrigger
-      >
+      <TabsTrigger value="smart account" class="cursor-pointer">Smart</TabsTrigger>
       <TabsTrigger value="register ens" class="cursor-pointer">ENS</TabsTrigger>
     </TabsList>
 
