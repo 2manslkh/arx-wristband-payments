@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && biome check --apply .",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "wagmi": "bunx wagmi generate"
+    "wagmi": "bunx wagmi generate",
+    "proxy": "ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R0:localhost:5173 a.pinggy.io"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.3.1",
@@ -37,6 +38,8 @@
     "@reown/appkit": "^1.5.1",
     "@reown/appkit-adapter-wagmi": "^1.5.1",
     "@resvg/resvg-js": "^2.6.2",
+    "@safe-global/protocol-kit": "^5.0.4",
+    "@safe-global/relay-kit": "^3.2.4",
     "@sveltejs/adapter-vercel": "^5.4.7",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@wagmi/cli": "^2.1.18",

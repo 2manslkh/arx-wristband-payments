@@ -2,23 +2,38 @@
   import { Button } from '$lib/components/ui/button';
   import { Wallet, ExternalLink, Key, LogOut, LogIn } from 'lucide-svelte';
   import {
+    getSafeSmartAccount,
+    getSafeSmartAccountAddress,
     getSmartAccount,
     getSmartAccountAddress,
     setSmartAccount,
     setSmartAccountAddress,
   } from '$stores/account.svelte';
   import { getPasskeySmartClient, signMessageWithSmartPasskeyClient } from '$lib/smartAccount/smartAccount';
-  import { signup, logout, login, getIsAuthenticated } from '$stores/auth.svelte';
+  import { signup, logout, login, getIsAuthenticated, setSafePasskey, getSafePasskey } from '$stores/auth.svelte';
   import { hasStoredPasskey } from '$lib/smartAccount/storage';
   import { dripToken } from '$lib/smartAccount/smartTransfer';
   import { tokenAddress } from '../../generated';
   import { zeroAddress } from 'viem';
+  import {
+    createPasskey,
+    loadPasskeyFromLocalStorage,
+    storePasskeyInLocalStorage,
+  } from '$lib/smartAccount/safePasskeys';
+
+  import { Safe4337Pack } from '@safe-global/relay-kit';
+  import { getSafeAddress, setIsSafeDeployed, setSafeAddress } from '$stores/safe.svelte';
+  import type { PasskeyArgType } from '@safe-global/protocol-kit';
+  import { PUBLIC_PIMLICO_API_KEY } from '$env/static/public';
+  import { getSafeSmartClient } from '$lib/smartAccount/safeSmartAccount';
 
   let isLoading = $state(false);
   let error = $state<string | null>(null);
   let storedPasskey = $state(false);
   let isAuthenticated = getIsAuthenticated();
   let smartAccountAddress = $derived(getSmartAccountAddress());
+  let safeAddress = $derived(getSafeAddress());
+  let safePasskey = $derived(getSafePasskey());
   let signedMessage = $state<string | null>(null);
 
   // Check for stored passkey on mount
@@ -45,26 +60,19 @@
       isLoading = true;
       error = null;
 
-      await login();
-
-      console.log('logged in');
-
       await handleCreateSmartAccount();
 
       console.log('smart account created');
 
-      const smartAccount = getSmartAccount();
+      const safeSmartAccount = getSafeSmartAccount();
+      const safeAddress = getSafeSmartAccountAddress();
 
-      if (!smartAccount) {
-        throw new Error('Smart account not found');
-      }
-
-      const receiver = smartAccount.account?.address ?? zeroAddress;
+      const receiver = '0x88827a6d3693F33Bb4Ab61adc5a880Baa4B333bD';
       console.log('🚀 | handleLogin | receiver:', receiver);
 
       // Give tokens to the smart account
-      let { success, transactionHash } = await dripToken(smartAccount!, tokenAddress[84532], receiver);
-      console.log('Dripped token to', success, transactionHash);
+      // let { success, transactionHash } = await dripToken(safeSmartAccount!, tokenAddress[84532], receiver);
+      // console.log('Dripped token to', success, transactionHash);
     } catch (err) {
       console.error('Login failed:', err);
       error = 'Login failed. Please try again.';
@@ -78,10 +86,10 @@
       isLoading = true;
       error = null;
 
-      const smartAccount = await getPasskeySmartClient();
+      const smartAccount = await getSafeSmartClient();
 
-      if (smartAccount?.account?.address) {
-        setSmartAccountAddress(smartAccount.account.address);
+      if (smartAccount) {
+        setSmartAccountAddress(await smartAccount.protocolKit.getAddress());
       }
     } catch (err) {
       console.error('Failed to create smart account:', err);
@@ -101,18 +109,76 @@
     window.open(`https://sepolia.basescan.org/address/${address}`, '_blank');
   }
 
-  async function handleSignMessage() {
+  async function handleTestTransaction() {
+    // Use smart account to send a transaction of 0 ether to target address
     try {
       isLoading = true;
-      error = null;
-      const signature = await signMessageWithSmartPasskeyClient();
-      signedMessage = signature;
-    } catch (err) {
-      console.error('Failed to sign message:', err);
-      error = 'Failed to sign message. Please try again.';
+      const smartAccount = getSafeSmartAccount();
+      console.log('🚀 | handleTestTransaction | smartAccount:', smartAccount);
+      if (!smartAccount) {
+        throw new Error('Smart account not found');
+      }
+
+      // Define the target address and transaction details
+      const targetAddress = '0x88827a6d3693F33Bb4Ab61adc5a880Baa4B333bD';
+      console.log('🚀 | handleTestTransaction | targetAddress:', targetAddress);
+      const transactionData = {
+        to: targetAddress,
+        value: '0x0', // Sending 0 ETH
+        data: '0x', // No additional data
+      };
+
+      // Create the transaction using the Safe smart account
+      const transaction = await smartAccount.createTransaction({
+        transactions: [transactionData],
+      });
+      console.log('🚀 | handleTestTransaction | transaction:', transaction);
+
+      const signedTransaction = await smartAccount.signSafeOperation(transaction);
+      console.log('🚀 | handleTestTransaction | signedTransaction:', signedTransaction);
+
+      // Submit the transaction
+      const result = await smartAccount.executeTransaction({ executable: signedTransaction });
+
+      return result;
+    } catch (error) {
+      console.error('Error in handleTestTransaction:', error);
+      throw error;
     } finally {
       isLoading = false;
     }
+  }
+
+  // Safe version
+  async function handleSignUp() {
+    const passkey = await createPasskey();
+
+    storePasskeyInLocalStorage(passkey);
+    setSafePasskey(passkey);
+
+    await showSafeInfo(passkey);
+  }
+
+  async function selectExistingPasskey() {
+    const passkey = loadPasskeyFromLocalStorage();
+    setSafePasskey(passkey);
+    await showSafeInfo(passkey);
+  }
+
+  async function showSafeInfo(passkey: PasskeyArgType) {
+    isLoading = true;
+    const safe4337Pack = await Safe4337Pack.init({
+      provider: 'https://sepolia.base.org',
+      signer: passkey,
+      bundlerUrl: `https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`,
+      options: {
+        owners: [],
+        threshold: 1,
+      },
+    });
+    setSafeAddress(await safe4337Pack.protocolKit.getAddress());
+    setIsSafeDeployed(await safe4337Pack.protocolKit.isSafeDeployed());
+    isLoading = false;
   }
 </script>
 
@@ -123,18 +189,22 @@
     </div>
   {/if}
 
-  {#if !smartAccountAddress}
+  {#if !smartAccountAddress && !safeAddress}
     <div class="space-y-4">
       <div class="text-center">
         <h2 class="text-lg font-semibold">Create or Login with Passkey</h2>
         <p class="text-sm text-muted-foreground">Create a new passkey or login with an existing one</p>
       </div>
 
-      <Button on:click={handleCreatePasskey} class="w-full" disabled={isLoading}>
+      <!-- <Button on:click={handleCreatePasskey} class="w-full" disabled={isLoading}>
         <Key class="mr-2 h-4 w-4" />
         {isLoading ? 'Creating Passkey...' : 'Create New Passkey'}
-      </Button>
+      </Button> -->
 
+      <Button on:click={handleSignUp} class="w-full" disabled={isLoading}>
+        <Key class="mr-2 h-4 w-4" />
+        {isLoading ? 'Creating Passkey...' : 'Create New Safe Passkey'}
+      </Button>
       {#if storedPasskey}
         <div class="relative">
           <div class="relative flex justify-center text-xs uppercase">
@@ -155,6 +225,12 @@
         <p class="text-sm text-muted-foreground break-all">
           Address: {smartAccountAddress}
         </p>
+
+        {#if safeAddress}
+          <p class="text-sm text-muted-foreground break-all">
+            Safe Address: {safeAddress}
+          </p>
+        {/if}
       </div>
 
       <div class="flex gap-2 flex-col">
@@ -172,9 +248,9 @@
           </Button>
         </div>
 
-        <Button variant="secondary" class="w-full" on:click={handleSignMessage} disabled={isLoading}>
+        <Button variant="secondary" class="w-full" on:click={handleTestTransaction} disabled={isLoading}>
           <Key class="mr-2 h-4 w-4" />
-          {isLoading ? 'Signing...' : 'Sign Message'}
+          {isLoading ? 'Signing...' : 'Send 0 ETH'}
         </Button>
 
         {#if signedMessage}

@@ -1,5 +1,7 @@
 import type { Hex } from 'viem';
 import type { PasskeyCredential } from './passkeys';
+import { loadPasskeyFromLocalStorage } from './safePasskeys';
+import type { PasskeyArgType } from '@safe-global/protocol-kit';
 
 export type StoredPasskey = {
     id: Hex;
@@ -68,25 +70,9 @@ export function storePasskey(passkey: PasskeyCredential): void {
  * Retrieves the stored passkey from local storage.
  * @returns The stored passkey or null if none exists
  */
-export function getStoredPasskey(): PasskeyCredential | null {
+export function getStoredPasskey(): PasskeyArgType | null {
     try {
-        const storedKey = getItem(PASSKEY_STORAGE_KEY);
-        if (!storedKey) return null;
-
-        const passkey = deserializePasskey(storedKey);
-        console.log("🚀 | getStoredPasskey | passkey:", passkey)
-        // Ensure publicKey x and y values are BigInt
-        if (typeof passkey.publicKey.x === 'string') {
-            passkey.publicKey.x = BigInt(passkey.publicKey.x);
-        }
-        if (typeof passkey.publicKey.y === 'string') {
-            passkey.publicKey.y = BigInt(passkey.publicKey.y);
-        }
-
-        // Validate the passkey structure
-        if (!passkey.id || !passkey.publicKey || !passkey.publicKeyHex || !passkey.raw) {
-            return null;
-        }
+        const passkey = loadPasskeyFromLocalStorage();
         return passkey;
     } catch (error) {
         console.error('Error retrieving stored passkey:', error);

@@ -3,6 +3,7 @@ import { tokenAbi } from "../../generated";
 import type { SmartAccountClient } from "permissionless";
 import { getPublicClient } from "$lib/connect/web3modal";
 import { baseSepolia } from "viem/chains";
+import type { Safe4337Pack } from "@safe-global/relay-kit";
 
 // Common validation function
 const validateTransaction = (smartAccount: SmartAccountClient, tokenAddress: `0x${string}`, receiver: `0x${string}`) => {
@@ -65,7 +66,7 @@ export async function transferToken(
 }
 
 export async function dripToken(
-    smartAccount: SmartAccountClient,
+    smartAccount: Safe4337Pack,
     tokenAddress: `0x${string}`,
     receiver: `0x${string}`,
 ) {

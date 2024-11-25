@@ -17,13 +17,13 @@ export default defineConfig({
     sveltekit()
   ],
 
-  server: {
-    https: {
-      key: fs.readFileSync('./server.key'),
-      cert: fs.readFileSync('./server.crt')
-    },
-    proxy: {}
-  },
+  // server: {
+  // https: {
+  //   key: fs.readFileSync('./server.key'),
+  //   cert: fs.readFileSync('./server.crt')
+  // },
+  // proxy: {}
+  // },
   test: {
     include: ['src/**/*.{test,spec}.{js,ts}']
   }

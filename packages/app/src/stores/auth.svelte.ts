@@ -1,11 +1,15 @@
 import { createPasskey, signInWithPasskey, verifyPasskey, type PasskeyCredential } from '$lib/smartAccount/passkeys';
 import { storePasskey, getStoredPasskey, type StoredPasskey } from '$lib/smartAccount/storage';
 import { getPasskeySmartClient } from '$lib/smartAccount/smartAccount';
+import type { PasskeyArgType } from '@safe-global/protocol-kit';
+import { setSafeAddress } from './safe.svelte';
+import { loadPasskeyFromLocalStorage } from '$lib/smartAccount/safePasskeys';
 
 let isAuthenticated = $state(false);
 let currentPasskeyAddress = $state<string | null>(null);
 let storedPasskey = $state<PasskeyCredential | null>(null);
 let credential = $state<PasskeyCredential | null>(null);
+let safePasskey = $state<PasskeyArgType | null>(null);
 
 export async function login() {
     try {
@@ -37,6 +41,7 @@ export function logout() {
     currentPasskeyAddress = null;
     storedPasskey = null;
     credential = null;
+    setSafeAddress(null);
 }
 
 export async function signup(username: string) {
@@ -80,4 +85,16 @@ export function getCredential(): PasskeyCredential {
     }
 
     return credential;
+}
+
+export function getSafePasskey(): PasskeyArgType {
+    if (!safePasskey) {
+        const stored = loadPasskeyFromLocalStorage();
+        safePasskey = stored;
+    }
+    return safePasskey;
+}
+
+export function setSafePasskey(passkey: PasskeyArgType) {
+    safePasskey = passkey;
 }

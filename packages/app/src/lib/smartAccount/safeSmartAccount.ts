@@ -1,68 +1,66 @@
 import { toSafeSmartAccount } from "permissionless/accounts"
 import 'dotenv/config';
 import { createSmartAccountClient, type SmartAccountClient } from 'permissionless';
-import { createPublicClient, getContract, http, parseEther, type Address, type EIP1193Provider, type LocalAccount, type WalletClient } from 'viem';
+import { createPublicClient, getContract, http, parseEther, zeroAddress, type Address, type EIP1193Provider, type LocalAccount, type WalletClient } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { PUBLIC_PIMLICO_API_KEY } from '$env/static/public';
 
-import { entryPoint07Address, toCoinbaseSmartAccount, toWebAuthnAccount } from 'viem/account-abstraction';
+import { entryPoint06Address, entryPoint07Address, toCoinbaseSmartAccount, toWebAuthnAccount } from 'viem/account-abstraction';
 import { tokenAbi, tokenAddress } from '../../generated';
-import { getSmartAccount, setPasskeyOwner, setPasskeyOwnerAddress, setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
+import { getSafeSmartAccount, getSmartAccount, setPasskeyOwner, setPasskeyOwnerAddress, setSafeSmartAccount, setSmartAccount, setSmartAccountAddress } from '$stores/account.svelte';
 import { setStatus, setTransactionLink } from '$stores/status.svelte';
-import { getAddressFromPublicKey } from '$lib/util/getAddressFromPublicKey';
 import { publicClient, paymasterClient } from '$lib/smartAccount/pimlico';
-import { getCredential } from "$stores/auth.svelte";
+import { Safe4337Pack, type SponsoredPaymasterOption } from "@safe-global/relay-kit";
+import { getStoredPasskey } from "./storage";
 
 
-export async function getPasskeySmartClient() {
+export async function getSafeSmartClient() {
 
-	const credential = getCredential();
-	const signer = toWebAuthnAccount({ credential: { id: credential.id, publicKey: credential.publicKeyHex } })
-	console.log("🚀 | getPasskeySmartClient | signer:", signer)
+	const passkey = getStoredPasskey();
 
-	setPasskeyOwner(signer);
-	setPasskeyOwnerAddress(getAddressFromPublicKey(signer.publicKey));
+	if (!passkey) {
+		throw new Error('No passkey found. Please sign up first.');
+	}
 
-	const smartAccount = await toCoinbaseSmartAccount({
-		client: publicClient,
-		owners: [signer],
+	const paymasterOptions = {
+		isSponsored: true,
+		paymasterAddress: "0x00000000000000fb866daaa79352cc568a005d96",
+		paymasterTokenAddress: zeroAddress,
+		paymasterUrl:
+			`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`
+	}
+	console.log("🚀 | getSafeSmartClient | paymasterOptions:", paymasterOptions)
+
+	const smartAccountClient = await Safe4337Pack.init({
+		provider: 'https://sepolia.base.org',
+		signer: passkey,
+		bundlerUrl: `https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`,
+		paymasterOptions,
+		options: {
+			owners: [
+				/* Other owners... */
+			],
+			threshold: 1
+		}
 	})
 
-	// const smartAccount = await toSafeSmartAccount({
-	// 	client: publicClient,
-	// 	entryPoint: {
-	// 		address: entryPoint07Address,
-	// 		version: "0.7"
-	// 	},
-	// 	owners: [signer], // Changed to provide address directly
-	// 	version: "1.4.1"
-	// });
-	console.log("🚀 | getPasskeySmartClient | smartAccount:", smartAccount)
+	setSafeSmartAccount(smartAccountClient);
 
-	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
-		account: smartAccount,
-		chain: baseSepolia,
-		paymaster: paymasterClient,
-		bundlerTransport: http(`https://api.pimlico.io/v2/base-sepolia/rpc?apikey=${PUBLIC_PIMLICO_API_KEY}`),
-		userOperation: {
-			estimateFeesPerGas: async () => (await paymasterClient.getUserOperationGasPrice()).fast
-		}
-	});
-	console.log("🚀 | getPasskeySmartClient | smartAccountClient:", smartAccountClient)
-
-	setSmartAccount(smartAccountClient);
 	return smartAccountClient;
+
 }
 
-export async function signMessageWithSmartPasskeyClient() {
-	const smartAccountClient = getSmartAccount();
+export async function signMessageWithSafeSmartClient() {
+	const safeSmartAccountClient = getSafeSmartAccount();
 
-	if (!smartAccountClient) {
+	if (!safeSmartAccountClient) {
 		throw new Error('Smart account client is undefined');
 	}
 
+	let safeMessage = safeSmartAccountClient.protocolKit.createMessage("Hello, world!")
+
 	// We can ignore the account parameter because we know it's a smart account
-	return smartAccountClient.signMessage({ message: "Hello, world!" });
+	return safeSmartAccountClient.signSafeOperation(safeMessage);
 }
 
 export async function addOwnerToSmartAccount(newOwnerAddress: Address) {
@@ -88,6 +86,10 @@ export async function getSmartClient(signer: LocalAccount) {
 		version: "1.4.1"
 	});
 
+	// const smartAccount = await toCoinbaseSmartAccount({
+	// 	client: publicClient,
+	// 	owners: [signer],
+	// })
 
 	const smartAccountClient: SmartAccountClient = createSmartAccountClient({
 		account: smartAccount,

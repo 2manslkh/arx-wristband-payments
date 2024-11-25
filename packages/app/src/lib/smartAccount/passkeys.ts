@@ -1,6 +1,7 @@
 import { WebAuthnP256 } from 'ox';
 import { toBytes, toHex, type Hex } from 'viem';
 import { getStoredPasskey } from './storage';
+import { extractPasskeyData } from '@safe-global/protocol-kit';
 
 export type PasskeyCredential = {
     id: string;
@@ -33,6 +34,7 @@ export async function createPasskey(username: string): Promise<PasskeyCredential
         const credential = await WebAuthnP256.createCredential({
             name: username
         });
+
         return {
             id: credential.id,
             publicKey: credential.publicKey,
